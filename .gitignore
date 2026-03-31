@@ -1,0 +1,49 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+.python-version
+.env
+.env.*
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+site/
+.eggs/
+*.egg
+*.egg-info/
+pip-wheel-metadata/
+
+# .NET
+bin/
+obj/
+.vs/
+TestResults/
+artifacts/
+*.user
+*.rsuser
+*.suo
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+.hintrc
+/material-docente

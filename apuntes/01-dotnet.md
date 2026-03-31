@@ -1,0 +1,270 @@
+# .NET y su ecosistema
+
+## Objetivo de la clase
+
+En esta clase vamos a construir una primera idea clara de qué es `.NET` y por qué no conviene pensar que es solamente “el lugar donde corre C#”.
+
+La idea es que, al terminar, el estudiante pueda distinguir entre:
+
+- lenguaje,
+- runtime,
+- framework,
+- biblioteca,
+- herramientas de desarrollo,
+- y ecosistema de paquetes.
+
+En otras palabras: antes de aprender a programar con comodidad, primero hay que entender en qué terreno estamos parados.
+
+## Idea de apertura
+
+Una buena forma de empezar la clase es con una pregunta simple:
+
+> ¿Qué es .NET? ¿Un lenguaje? ¿Un programa? ¿Un framework? ¿Un SDK? ¿Todo eso junto?
+
+La confusión inicial no está mal. De hecho, es esperable. Muchas personas usan `.NET` y `C#` como si fueran sinónimos, pero no lo son.
+
+Una primera idea ordenadora podría ser esta:
+
+> C# es un lenguaje. .NET es la plataforma que permite construir y ejecutar aplicaciones usando C# y otros lenguajes.
+
+## Qué es .NET
+
+`.NET` es una **plataforma de desarrollo**. Eso significa que no es solo un compilador ni un lenguaje, sino un conjunto de piezas que trabajan juntas para permitirnos construir software.
+
+Dentro de esa plataforma encontramos:
+
+- un **runtime** para ejecutar programas,
+- un conjunto de **bibliotecas base**,
+- herramientas de compilación y ejecución,
+- frameworks para distintos tipos de aplicaciones,
+- y un ecosistema de paquetes reutilizables.
+
+Con `.NET` se pueden construir muchos tipos de software:
+
+- aplicaciones de consola,
+- aplicaciones web,
+- APIs,
+- aplicaciones de escritorio,
+- aplicaciones móviles,
+- servicios,
+- y bibliotecas reutilizables.
+
+### Idea importante
+
+`.NET` no es solamente “algo para programar en C#”. Más bien, es una plataforma completa sobre la que después aparecen herramientas y frameworks específicos como:
+
+- `ASP.NET Core`,
+- `Entity Framework Core`,
+- `.NET MAUI`,
+- y muchas bibliotecas del espacio `System.*`.
+
+### Analogía útil
+
+Una analogía posible es esta:
+
+- **C#** es el idioma,
+- **.NET** es la infraestructura que permite usar ese idioma para construir cosas reales,
+- y los frameworks son distintos entornos de trabajo especializados.
+
+## Lenguajes compatibles
+
+Aunque en esta materia el lenguaje principal será **C#**, es importante entender que `.NET` puede trabajar con más de un lenguaje.
+
+### C
+
+Es el lenguaje principal del ecosistema `.NET` y el más difundido en la actualidad. Se usa para:
+
+- aplicaciones de consola,
+- web,
+- APIs,
+- escritorio,
+- móvil,
+- acceso a datos,
+- automatización,
+- y herramientas de desarrollo.
+
+Por eso va a ser el lenguaje base de la cursada.
+
+### F
+
+`F#` es un lenguaje funcional que también corre sobre `.NET`. Aunque no sea el foco de la materia, sirve para mostrar que la plataforma soporta distintos paradigmas de programación.
+
+### VB.NET
+
+`VB.NET` tuvo mucho uso histórico en el ecosistema Microsoft. Hoy tiene mucho menos protagonismo en proyectos nuevos, pero sigue siendo parte del contexto general de la plataforma.
+
+### Idea que debe quedar
+
+La plataforma `.NET` no depende de un único lenguaje. Distintos lenguajes pueden compartir runtime, bibliotecas y herramientas.
+
+## Frameworks y librerías comunes
+
+En este punto conviene distinguir dos conceptos que a veces se mezclan.
+
+### Biblioteca
+
+Una **biblioteca** ofrece clases, funciones o componentes para resolver tareas concretas.
+
+Ejemplos comunes en `.NET`:
+
+- `System.IO` para archivos y streams,
+- `System.Text.Json` para trabajar con JSON,
+- `System.Linq` para consultas sobre colecciones,
+- `System.Net.Http` para comunicación HTTP,
+- `System.Collections.Generic` para colecciones genéricas.
+
+### Framework
+
+Un **framework** es una estructura más grande que organiza la forma de construir un tipo de aplicación.
+
+### Frameworks importantes del ecosistema
+
+#### ASP.NET Core
+
+Se usa para construir:
+
+- sitios web,
+- APIs REST,
+- aplicaciones backend,
+- servicios web.
+
+#### Entity Framework Core
+
+Se usa para acceso a datos mediante ORM. Permite mapear objetos y clases a tablas y relaciones de una base de datos.
+
+#### .NET MAUI
+
+Se usa para construir aplicaciones multiplataforma con interfaz gráfica.
+
+### Idea que debe quedar
+
+El ecosistema `.NET` no obliga a empezar todo desde cero. Ya trae bibliotecas muy completas y, además, frameworks especializados para resolver problemas frecuentes.
+
+## Herramientas de desarrollo
+
+Trabajar con `.NET` implica usar herramientas que permitan escribir, compilar, ejecutar, depurar y publicar aplicaciones.
+
+### Visual Studio
+
+Es el IDE más completo del ecosistema `.NET`. Integra:
+
+- editor,
+- compilación,
+- depuración,
+- administración de proyectos,
+- pruebas,
+- publicación,
+- y herramientas visuales.
+
+Es especialmente cómodo para quienes buscan una experiencia integrada.
+
+### Visual Studio Code
+
+Es más liviano y flexible. No es un IDE tan cerrado como Visual Studio, pero con extensiones adecuadas funciona muy bien para:
+
+- editar código C#,
+- trabajar con terminal,
+- usar Git,
+- escribir documentación,
+- trabajar con Quarto y Markdown,
+- y mantener proyectos multiplataforma.
+
+### CLI de .NET
+
+La **CLI** (`Command Line Interface`) es muy importante porque muestra que `.NET` también puede trabajarse desde terminal, de forma portable y automatizable.
+
+Algunos comandos básicos que conviene mostrar temprano son:
+
+``` bash
+dotnet new console
+dotnet run
+dotnet build
+dotnet test
+dotnet add package Newtonsoft.Json
+```
+
+## Estructura básica de un proyecto .NET
+
+Cuando se crea un proyecto con la CLI, aparecen varios archivos y carpetas que vale la pena explicar aunque sea de forma introductoria.
+
+Por ejemplo, en un proyecto simple de consola suelen aparecer:
+
+- `Program.cs`
+- archivo `.csproj`
+- carpeta `bin/`
+- carpeta `obj/`
+
+### `Program.cs`
+
+Es el punto de entrada principal de la aplicación. Allí comienza la ejecución.
+
+### `.csproj`
+
+Es el archivo de proyecto. Define información como:
+
+- nombre del proyecto,
+- tipo de salida,
+- framework objetivo,
+- paquetes instalados,
+- configuraciones generales.
+
+### `bin/` y `obj/`
+
+Son carpetas generadas por el proceso de compilación. No suelen editarse a mano.
+
+## Runtime, SDK y compilación
+
+### Runtime
+
+El runtime permite **ejecutar** aplicaciones ya compiladas.
+
+### SDK
+
+El SDK incluye herramientas para:
+
+- crear proyectos,
+- compilar,
+- ejecutar,
+- restaurar paquetes,
+- testear,
+- publicar.
+
+Es decir:
+
+- **runtime** = ejecutar,
+- **SDK** = desarrollar.
+
+## Ecosistema de paquetes NuGet
+
+`NuGet` es el gestor de paquetes de `.NET`. Permite agregar dependencias externas a un proyecto de forma ordenada.
+
+### Qué problema resuelve
+
+Sin un gestor de paquetes, cada proyecto tendría que administrar manualmente bibliotecas externas, versiones y archivos compilados. Eso vuelve el mantenimiento mucho más frágil y confuso.
+
+`NuGet` permite:
+
+- buscar bibliotecas,
+- instalarlas,
+- versionarlas,
+- actualizarlas,
+- restaurarlas automáticamente.
+
+## Cierre integrador
+
+Esta clase no busca todavía que el estudiante domine sintaxis de C#, sino que entienda el terreno completo donde esa sintaxis va a vivir.
+
+La idea fuerte que debería quedar es esta:
+
+> Aprender C# es aprender un lenguaje. Aprender .NET es aprender una plataforma completa para construir aplicaciones reales.
+
+## Resumen final para proyectar
+
+- `.NET` es una plataforma de desarrollo.
+- `C#` es el lenguaje principal de la materia.
+- `.NET` soporta varios lenguajes.
+- El ecosistema incluye frameworks como `ASP.NET Core`, `EF Core` y `.NET MAUI`.
+- Se puede trabajar con IDE o con CLI.
+- `NuGet` permite instalar y administrar paquetes.
+
+##

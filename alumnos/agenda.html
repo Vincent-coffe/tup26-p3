@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alumnos · TUP 2026 · Programación III</title>
+  <meta name="theme-color" content="#f4eadf">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg:       #f4eadf;
+      --bg-2:     #ebe0d2;
+      --surface:  #fffaf3;
+      --ink:      #211912;
+      --muted:    #695d54;
+      --line:     rgba(33, 25, 18, .13);
+      --radius:   22px;
+      --avatar:   88px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+      background:
+        radial-gradient(circle at top left,  rgba(141, 59, 42, .16)  0%, transparent 30%),
+        radial-gradient(circle at top right, rgba(166, 102, 53, .13) 0%, transparent 34%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+    }
+
+    /* ── Layout ──────────────────────────────────────── */
+    .page {
+      position: relative;
+      width: min(1480px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 60px;
+    }
+
+    /* ── Header ──────────────────────────────────────── */
+    .header {
+      padding: 24px 24px 20px;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 6px);
+      background: linear-gradient(180deg, rgba(255,252,246,.9) 0%, rgba(255,248,239,.78) 100%);
+      box-shadow: 0 16px 36px rgba(74, 49, 32, .11);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 20px 32px;
+      margin-bottom: 20px;
+    }
+
+    .header-text { flex: 1; min-width: 200px; }
+
+    .eyebrow {
+      font-size: .72rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 700;
+      line-height: .95;
+      letter-spacing: -.05em;
+    }
+
+    .header-subtitle {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: clamp(.9rem, 1.2vw, 1rem);
+      line-height: 1.6;
+    }
+
+    /* ── Controls ─────────────────────────────────────── */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      flex: 0 1 auto;
+      min-width: min(100%, 380px);
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px;
+      height: 15px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      padding: .56rem .75rem .56rem 2.2rem;
+      border: 1.5px solid rgba(33, 25, 18, .18);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: .88rem;
+      background: rgba(255, 255, 255, .7);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 140ms;
+    }
+
+    input[type="search"]:focus { border-color: #8c3b2a; }
+    input[type="search"]::placeholder { color: #a09288; }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab {
+      padding: .45rem .9rem;
+      border: 1.5px solid rgba(33, 25, 18, .18);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .6);
+      font-family: inherit;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 140ms;
+      white-space: nowrap;
+    }
+
+    .tab:hover { border-color: var(--ink); color: var(--ink); }
+
+    .tab.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--bg);
+    }
+
+    /* ── Counter bar ──────────────────────────────────── */
+    .counter {
+      padding: .5rem 0 .75rem;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    /* ── Grid ─────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── Card ─────────────────────────────────────────── */
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: var(--radius);
+      border: 1px solid rgba(33, 25, 18, .11);
+      border-top: 5px solid var(--accent, #8c3b2a);
+      background: linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--accent, #8c3b2a) 7%, var(--surface)) 0%,
+        var(--surface) 22%,
+        rgba(255, 249, 241, .9) 100%
+      );
+      box-shadow: 0 14px 32px rgba(74, 49, 32, .1);
+      animation: rise 600ms cubic-bezier(.16, 1, .3, 1) both;
+      animation-delay: calc(var(--i, 0) * 18ms);
+      transition: box-shadow 180ms, transform 180ms;
+    }
+
+    .card:hover {
+      box-shadow: 0 22px 48px rgba(74, 49, 32, .16);
+      transform: translateY(-2px);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right,
+        color-mix(in oklab, var(--accent, #8c3b2a) 16%, transparent), transparent 40%);
+      pointer-events: none;
+    }
+
+    /* ── Card top ─────────────────────────────────────── */
+    .card-top {
+      display: grid;
+      grid-template-columns: var(--avatar) 1fr;
+      gap: 14px;
+      padding: 18px 18px 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Avatar ───────────────────────────────────────── */
+    .avatar-wrap {
+      width: var(--avatar);
+      aspect-ratio: 1;
+      border-radius: 20px;
+      overflow: hidden;
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--accent, #8c3b2a) 80%, white),
+        color-mix(in oklab, var(--accent, #8c3b2a) 60%, black) 100%
+      );
+      position: relative;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
+    }
+
+    .avatar-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .avatar-initials {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: rgba(255, 250, 243, .95);
+      text-transform: uppercase;
+    }
+
+    .avatar-initials.visible {
+      display: flex;
+    }
+
+    /* ── Identity ─────────────────────────────────────── */
+    .identity { min-width: 0; }
+
+    .card-eyebrow {
+      font-size: .68rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: color-mix(in oklab, var(--accent, #8c3b2a) 70%, var(--ink));
+      margin-bottom: 5px;
+    }
+
+    .card-name {
+      font-size: clamp(1rem, 1.6vw, 1.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      border: 1px solid rgba(33, 25, 18, .12);
+      background: rgba(255, 255, 255, .65);
+      white-space: nowrap;
+    }
+
+    .badge-comision-c7 { background: rgba(56, 142, 60, .12); color: #2e6b31; border-color: rgba(56, 142, 60, .22); }
+    .badge-comision-c9 { background: rgba(57, 89, 174, .12); color: #2c4399; border-color: rgba(57, 89, 174, .22); }
+
+    /* ── Card body ────────────────────────────────────── */
+    .card-body {
+      padding: 0 18px 18px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(33, 25, 18, .09);
+      margin-bottom: 4px;
+    }
+
+    .detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .82rem;
+      color: var(--muted);
+      min-height: 1.5em;
+    }
+
+    .detail svg {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      opacity: .65;
+    }
+
+    .detail-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .detail-value a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .detail-value a:hover { color: #8c3b2a; }
+
+    .detail-empty {
+      font-style: italic;
+      opacity: .5;
+    }
+
+    /* ── Loading / Error state ────────────────────────── */
+    .state {
+      grid-column: 1 / -1;
+      padding: 5rem 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      line-height: 1.7;
+    }
+
+    .state code {
+      background: rgba(255, 255, 255, .5);
+      border: 1px solid rgba(33, 25, 18, .1);
+      border-radius: 6px;
+      padding: .1em .4em;
+      font-family: ui-monospace, monospace;
+      font-size: .88em;
+    }
+
+    /* ── Animations ───────────────────────────────────── */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px) scale(.985); }
+      to   { opacity: 1; transform: translateY(0s)   scale(1);    }
+    }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 860px) {
+      .header { flex-direction: column; align-items: flex-start; }
+      .controls { width: 100%; }
+    }
+
+    @media (max-width: 560px) {
+      :root { --avatar: 72px; }
+      .page { padding: 16px 0 40px; }
+      .header { padding: 18px 16px; }
+      .grid { gap: 12px; }
+      h1 { font-size: clamp(2rem, 10vw, 3rem); }
+    }
+
+    @media (min-width: 1040px) {
+      .grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card { animation: none; transition: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+
+    <header class="header">
+      <div class="header-text">
+        <p class="eyebrow">Perfiles académicos</p>
+        <h1>Alumnos</h1>
+        <p class="header-subtitle">
+          TUP 2026 · Programación III — datos cargados dinámicamente desde <code style="font-family:ui-monospace,monospace;font-size:.85em;background:rgba(255,255,255,.5);border:1px solid rgba(33,25,18,.1);border-radius:5px;padding:.05em .35em">alumnos.md</code>
+        </p>
+      </div>
+      <div class="controls">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="6.5" cy="6.5" r="5.2"/>
+            <line x1="10.3" y1="10.3" x2="14" y2="14"/>
+          </svg>
+          <input type="search" id="search" placeholder="Buscar nombre, legajo, GitHub… o sin-foto/sin-github/sin-telefono" autocomplete="off">
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-filter="todos">Todos</button>
+          <button class="tab" data-filter="C7">C7</button>
+          <button class="tab" data-filter="C9">C9</button>
+          <button class="tab" data-filter="sin-foto">Sin Foto</button>
+          <button class="tab" data-filter="sin-github">Sin GitHub</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="counter" id="counter" aria-live="polite"></div>
+
+    <div class="grid" id="grid" role="list">
+      <div class="state">Cargando alumnos…</div>
+    </div>
+
+  </main>
+
+  <script>
+    // ── Palette (8 accent colours, cycling by legajo) ─────────────────────────
+    const ACCENTS = [
+      '#8c3b2a', '#a85a1d', '#7c6826', '#4f6f3b',
+      '#2b6671', '#3b5a8c', '#6e3b8c', '#8c3b6e',
+    ];
+
+    function accentFor(legajo) {
+      return ACCENTS[legajo % ACCENTS.length];
+    }
+
+    // ── alumnos.md parser ─────────────────────────────────────────────────────
+    function parseAlumnos(text) {
+      const alumnos = [];
+      let comision = '';
+      let inBlock = false;
+
+      for (const raw of text.split('\n')) {
+        const line = raw.trimEnd();
+
+        if (line.startsWith('## ')) {
+          comision = line.slice(3).trim();
+          inBlock = false;
+          continue;
+        }
+
+        if (line.startsWith('```')) {
+          inBlock = !inBlock;
+          continue;
+        }
+
+        if (!inBlock || !comision) continue;
+
+        // skip header / separator / empty
+        if (!line.trim() || line.startsWith('Legajo') || line.startsWith('------')) continue;
+
+        // split on 2+ consecutive spaces
+        const cols = line.trim().split(/\s{2,}/);
+        if (cols.length < 5) continue;
+
+        const legajo = parseInt(cols[0], 10);
+        if (isNaN(legajo)) continue;
+
+        const apellidoNombre = cols[1].trim();       // "Apellido, Nombre"
+        const telefonoRaw    = cols[2].trim();
+        const fotoRaw        = cols[3].trim();
+        const gitHubRaw      = cols[4].trim();
+
+        const comma    = apellidoNombre.indexOf(',');
+        const apellido = comma >= 0 ? apellidoNombre.slice(0, comma).trim() : apellidoNombre;
+        const nombre   = comma >= 0 ? apellidoNombre.slice(comma + 1).trim() : '';
+
+        const telefono = (telefonoRaw === '—' || telefonoRaw === '-') ? '' : telefonoRaw;
+        const gitHub   = (gitHubRaw   === '—' || gitHubRaw   === '-') ? '' : gitHubRaw;
+        const tieneFoto = fotoRaw === 'Si';
+
+        // CarpetaNombre exactly mirrors C# CarpetaNombre property
+        const carpetaNombre = `${legajo} - ${apellido}, ${nombre}`;
+        const fotoPaths     = [
+          `../practicos/${carpetaNombre}/foto.png`,
+          `../practicos/${carpetaNombre}/foto.jpg`,
+        ];
+
+        alumnos.push({ legajo, apellido, nombre, apellidoNombre, telefono, gitHub, tieneFoto, comision, fotoPath: '', fotoPaths });
+      }
+
+      return alumnos;
+    }
+
+    // ── Render ────────────────────────────────────────────────────────────────
+    function initials(apellido, nombre) {
+      return (apellido.charAt(0) + (nombre.charAt(0) || '')).toUpperCase();
+    }
+
+    function renderCard(alumno, idx) {
+      const accent  = accentFor(alumno.legajo);
+      const inits   = initials(alumno.apellido, alumno.nombre);
+      const comBadge = `badge-comision-${alumno.comision.toLowerCase()}`;
+
+      const phoneHtml = alumno.telefono
+        ? `<span class="detail-value">${escHtml(alumno.telefono)}</span>`
+        : `<span class="detail-value detail-empty">sin teléfono</span>`;
+
+      const ghHtml = alumno.gitHub
+        ? `<span class="detail-value"><a href="https://github.com/${escHtml(alumno.gitHub)}" target="_blank" rel="noopener noreferrer">${escHtml(alumno.gitHub)}</a></span>`
+        : `<span class="detail-value detail-empty">sin GitHub</span>`;
+
+      const avatarHtml = alumno.tieneFoto && alumno.fotoPath
+        ? `<img class="avatar-img"
+                src="${escHtml(alumno.fotoPath)}"
+                alt="Foto de ${escHtml(alumno.apellidoNombre)}"
+                loading="lazy"
+                onerror="this.style.display='none';this.nextElementSibling.classList.add('visible')">
+              <div class="avatar-initials">${inits}</div>`
+        : `<div class="avatar-initials visible">${inits}</div>`;
+
+      return `
+        <article class="card" style="--accent:${accent};--i:${idx}" role="listitem">
+          <div class="card-top">
+            <div class="avatar-wrap">
+              ${avatarHtml}
+            </div>
+            <div class="identity">
+              <p class="card-eyebrow">Tarjeta personal</p>
+              <h2 class="card-name">${escHtml(alumno.apellidoNombre)}</h2>
+              <div class="badges">
+                <span class="badge">${alumno.legajo}</span>
+                <span class="badge ${comBadge}">${escHtml(alumno.comision)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <hr class="divider">
+            <div class="detail">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 6.5C13 11 8 14.5 8 14.5S3 11 3 6.5a5 5 0 0 1 10 0Z"/>
+                <circle cx="8" cy="6.5" r="1.8"/>
+              </svg>
+              ${phoneHtml}
+            </div>
+            <div class="detail">
+              <svg viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+              </svg>
+              ${ghHtml}
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function imageExists(src) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(src);
+        img.onerror = () => resolve('');
+        img.src = src;
+      });
+    }
+
+    async function resolveAlumnoPhoto(alumno) {
+      for (const candidate of alumno.fotoPaths) {
+        const found = await imageExists(candidate);
+        if (found) {
+          alumno.fotoPath = found;
+          alumno.tieneFoto = true;
+          return alumno;
+        }
+      }
+
+      alumno.fotoPath = '';
+      alumno.tieneFoto = false;
+      return alumno;
+    }
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let allAlumnos = [];
+    let activeFilter = 'todos';
+    let searchQuery  = '';
+
+    function parseSearchQuery(query) {
+      const normalized = query.toLowerCase();
+      const terms = normalized.split(/[\s,]+/).filter(Boolean);
+      const commissionTerms = ['c7', 'c9'].filter(term => terms.includes(term));
+
+      return {
+        requireSinFoto: terms.includes('sin-foto'),
+        requireSinGithub: terms.includes('sin-github'),
+        requireSinTelefono: terms.includes('sin-telefono'),
+        commissions: commissionTerms,
+        text: terms
+          .filter(term => term !== 'sin-foto' && term !== 'sin-github' && term !== 'sin-telefono' && term !== 'c7' && term !== 'c9')
+          .join(' ')
+          .trim(),
+      };
+    }
+
+    function matchesFilter(alumno, filter) {
+      switch (filter) {
+        case 'todos':
+          return true;
+        case 'sin-foto':
+          return !alumno.tieneFoto;
+        case 'sin-github':
+          return !alumno.gitHub;
+        default:
+          return alumno.comision === filter;
+      }
+    }
+
+    function getVisible() {
+      const parsed = parseSearchQuery(searchQuery);
+
+      return allAlumnos.filter(a => {
+        if (!matchesFilter(a, activeFilter)) return false;
+        if (parsed.commissions.length > 0 && !parsed.commissions.includes(a.comision.toLowerCase())) return false;
+        if (parsed.requireSinFoto && a.tieneFoto) return false;
+        if (parsed.requireSinGithub && !!a.gitHub) return false;
+        if (parsed.requireSinTelefono && !!a.telefono) return false;
+
+        if (!parsed.text) return true;
+        const q = parsed.text;
+        return (
+          a.apellido.toLowerCase().includes(q) ||
+          a.nombre.toLowerCase().includes(q) ||
+          a.apellidoNombre.toLowerCase().includes(q) ||
+          String(a.legajo).includes(q) ||
+          a.gitHub.toLowerCase().includes(q) ||
+          a.telefono.toLowerCase().includes(q)
+        );
+      });
+    }
+
+    function render() {
+      const visible = getVisible();
+      const grid    = document.getElementById('grid');
+      const counter = document.getElementById('counter');
+
+      if (visible.length === 0) {
+        grid.innerHTML = '<div class="state">Sin resultados para la búsqueda.</div>';
+        counter.textContent = '';
+        return;
+      }
+
+      grid.innerHTML = visible.map((a, i) => renderCard(a, i)).join('');
+
+      const total = allAlumnos.filter(a => matchesFilter(a, activeFilter)).length;
+
+      counter.textContent = visible.length === total
+        ? `${total} alumno${total !== 1 ? 's' : ''}`
+        : `${visible.length} de ${total} alumno${total !== 1 ? 's' : ''}`;
+    }
+
+    // ── Event listeners ───────────────────────────────────────────────────────
+    document.getElementById('search').addEventListener('input', e => {
+      searchQuery = e.target.value.trim();
+      render();
+    });
+
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    fetch('./alumnos.md')
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.text();
+      })
+      .then(async text => {
+        allAlumnos = await Promise.all(parseAlumnos(text).map(resolveAlumnoPhoto));
+        render();
+      })
+      .catch(() => {
+        document.getElementById('grid').innerHTML = `
+          <div class="state">
+            No se pudo cargar <code>alumnos.md</code>.<br>
+            Abrí esta página desde un servidor local —<br>
+            en VS Code: clic derecho → <em>Open with Live Server</em>.
+          </div>`;
+      });
+  </script>
+</body>
+</html>
