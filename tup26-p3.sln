@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "practicos", "practicos", "{86514B30-D69A-12CF-5B08-EF850C7A0A26}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "63150 - Carlino, Joaquin", "63150 - Carlino, Joaquin", "{84908CCA-73B6-3B7B-F6C5-FA1FDD8D3300}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TP1", "TP1", "{F330173B-3ABF-DA44-2363-48CC5114B80B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvSorter", "practicos\63150 - Carlino, Joaquin\TP1\CsvSorter\CsvSorter.csproj", "{B6099908-63DF-36FD-5599-A7668CE1F0DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6099908-63DF-36FD-5599-A7668CE1F0DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6099908-63DF-36FD-5599-A7668CE1F0DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6099908-63DF-36FD-5599-A7668CE1F0DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6099908-63DF-36FD-5599-A7668CE1F0DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{84908CCA-73B6-3B7B-F6C5-FA1FDD8D3300} = {86514B30-D69A-12CF-5B08-EF850C7A0A26}
+		{F330173B-3ABF-DA44-2363-48CC5114B80B} = {84908CCA-73B6-3B7B-F6C5-FA1FDD8D3300}
+		{B6099908-63DF-36FD-5599-A7668CE1F0DB} = {F330173B-3ABF-DA44-2363-48CC5114B80B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6EFD4999-5656-4571-A115-10522DE448B3}
+	EndGlobalSection
+EndGlobal
