@@ -1,7 +1,6 @@
 namespace Tup26.AlumnosApp;
 
-class Alumno
-{
+class Alumno {
     public int Legajo;
     public string Comision = string.Empty;
     public string Nombre = string.Empty;
@@ -24,98 +23,80 @@ class Alumno
 
     public string NombreCompleto => $"{Apellido}, {Nombre}".Trim().Trim(',');
 
-    public static int Comparar(Alumno alumnoA, Alumno alumnoB)
-    {
+    public static int Comparar(Alumno alumnoA, Alumno alumnoB) {
         int comparacion = string.Compare(FormatearComision(alumnoA), FormatearComision(alumnoB), StringComparison.OrdinalIgnoreCase);
-        if (comparacion != 0)
-        {
+        if (comparacion != 0) {
             return comparacion;
         }
 
         comparacion = string.Compare(FormatearTexto(alumnoA.Apellido), FormatearTexto(alumnoB.Apellido), StringComparison.OrdinalIgnoreCase);
-        if (comparacion != 0)
-        {
+        if (comparacion != 0) {
             return comparacion;
         }
 
         comparacion = string.Compare(FormatearTexto(alumnoA.Nombre), FormatearTexto(alumnoB.Nombre), StringComparison.OrdinalIgnoreCase);
-        if (comparacion != 0)
-        {
+        if (comparacion != 0) {
             return comparacion;
         }
 
         return alumnoA.Legajo.CompareTo(alumnoB.Legajo);
     }
 
-    public void Practico(int numero, Estado estado)
-    {
-        if (practicos == null)
-        {
+    public void Practico(int numero, Estado estado) {
+        if (practicos == null) {
             practicos = new();
         }
 
-        while (practicos.Count < numero)
-        {
+        while (practicos.Count < numero) {
             practicos.Add(Estado.Vacio);
         }
 
         practicos[numero - 1] = estado;
     }
 
-    public void Examen(int numero, Estado estado)
-    {
-        if (examenes == null)
-        {
+    public void Examen(int numero, Estado estado) {
+        if (examenes == null) {
             examenes = new();
         }
 
-        while (examenes.Count < numero)
-        {
+        while (examenes.Count < numero) {
             examenes.Add(Estado.Vacio);
         }
 
         examenes[numero - 1] = estado;
     }
 
-    static string FormatearTelefonoId(string telefono)
-    {
+    static string FormatearTelefonoId(string telefono) {
         string digitos = Regex.Replace(telefono.Trim(), @"\D", string.Empty);
 
-        if (string.IsNullOrWhiteSpace(digitos))
-        {
+        if (string.IsNullOrWhiteSpace(digitos)) {
             return string.Empty;
         }
 
-        if (digitos.StartsWith("549"))
-        {
+        if (digitos.StartsWith("549")) {
             return digitos;
         }
 
-        if (digitos.StartsWith("54"))
-        {
+        if (digitos.StartsWith("54")) {
             return $"549{digitos.Substring(2)}";
         }
 
-        if (digitos.StartsWith("0"))
-        {
+        if (digitos.StartsWith("0")) {
             digitos = digitos.Substring(1);
         }
 
         return $"549{digitos}";
     }
 
-    static string FormatearTexto(string texto)
-    {
-        if (string.IsNullOrWhiteSpace(texto))
-        {
+    static string FormatearTexto(string texto) {
+        if (string.IsNullOrWhiteSpace(texto)) {
             return "—";
         }
 
         return texto.Trim();
     }
 
-    static string FormatearComision(Alumno alumno)
-    {
+    static string FormatearComision(Alumno alumno) {
         return FormatearTexto(alumno.Comision);
     }
 }

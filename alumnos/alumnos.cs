@@ -1,9 +1,7 @@
 namespace Tup26.AlumnosApp;
 
-class Program
-{
-    static void Main(string[] args)
-    {
+class Program {
+    static void Main(string[] args) {
         Alumnos alumnos = AlumnosManager.CargarAlumnos(AppPaths.ArchivoAlumnos);
 
         // foreach (var a in alumnos.ConGithub())
@@ -42,14 +40,10 @@ class Program
 
         // Alumnos alumnosConTelefonoComision9 = alumnos.EnComision("C9").SinTelefono();
 
-        // AlumnosManager.Listar(alumnosConTelefonoComision9);
-        // wapp.InvitarGrupoComision(alumnos);
-
         // AlumnosManager.Listar(alumnos.ParaAgregar());
 
         // AlumnosManager.GuardarVCard(alumnos.ParaAgregar().EnComision("C7"), "alumnos-agregar-c7.vcf");
         // AlumnosManager.GuardarVCard(alumnos.ParaAgregar().EnComision("C9"), "alumnos-agregar-c9.vcf");
-        // wapp.InvitarGrupoComision(alumnos.ParaAgregar());
         // AlumnosManager.CopiarEnunciadoPracticos(alumnos, "tp1");
 
         GitHub gh = new GitHub();
@@ -65,31 +59,24 @@ class Program
         Console.WriteLine($"Pendientes: {string.Join(" ", invitaciones)}");
         Console.WriteLine();
 
-        foreach (Alumno a in alumnos)
-        {
-            if (a.ConGithub)
-            {
+        foreach (Alumno a in alumnos) {
+            if (a.ConGithub) {
                 string usuario = a.GitHub.Trim().ToLower();
 
-                if (colaboradores.Contains(usuario))
-                {
+                if (colaboradores.Contains(usuario)) {
                     a.Practico(1, Estado.Aprobado);
                 }
-                else if (invitaciones.Contains(usuario))
-                {
+                else if (invitaciones.Contains(usuario)) {
                     a.Practico(1, Estado.Pendiente);
                 }
-                else if (gh.AgregarColaborador(a.GitHub))
-                {
+                else if (gh.AgregarColaborador(a.GitHub)) {
                     a.Practico(1, Estado.Pendiente);
                 }
-                else
-                {
+                else {
                     a.Practico(1, Estado.Revision);
                 }
             }
-            else
-            {
+            else {
                 a.Practico(1, Estado.Desaprobado);
             }
         }
@@ -100,7 +87,7 @@ class Program
         // MensajesService.MensajeGithubErroneo();
 
         // WAppService wapp = new WAppService();
-        // foreach (var p in wapp.ListarParticipantesGrupo("TUP26-P3-C7"))
+        // foreach (var p in wapp.Participantes("TUP26-P3-C7"))
         // {
         //     Console.WriteLine($"Participante del grupo C7: {p.Name} | {p.PhoneNumber} | {p.Jid}");
         // }

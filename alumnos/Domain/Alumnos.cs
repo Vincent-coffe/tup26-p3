@@ -1,20 +1,17 @@
 namespace Tup26.AlumnosApp;
 
-class Alumnos : IEnumerable<Alumno>
-{
+class Alumnos : IEnumerable<Alumno> {
     public List<Alumno> Lista { get; set; } = new();
 
     public int Count => Lista.Count;
 
     public Alumno this[int index] => Lista[index];
 
-    public Alumnos(IEnumerable<Alumno> alumnos)
-    {
+    public Alumnos(IEnumerable<Alumno> alumnos) {
         Lista = alumnos?.ToList() ?? new();
     }
 
-    public void Agregar(Alumno alumno)
-    {
+    public void Agregar(Alumno alumno) {
         Lista.Add(alumno);
     }
 
@@ -40,13 +37,11 @@ class Alumnos : IEnumerable<Alumno>
     public Alumnos ParaAgregar() =>
         new(Lista.Where(alumno => alumno.GitHub == "(agregar)"));
 
-    public IEnumerator<Alumno> GetEnumerator()
-    {
+    public IEnumerator<Alumno> GetEnumerator() {
         return Lista.GetEnumerator();
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
+    IEnumerator IEnumerable.GetEnumerator() {
         return GetEnumerator();
     }
 }

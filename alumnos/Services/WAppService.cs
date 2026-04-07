@@ -1,75 +1,73 @@
+using System.Runtime.InteropServices.Marshalling;
+
 namespace Tup26.AlumnosApp;
 
-class WAppService
-{
+/*
+# WAppService
+
+Servicio para interactuar con WhatsApp mediante `wacli`.
+
+## Funciones públicas
+
+- `Sincronizar()`: actualiza la base local desde `wacli` y recarga los grupos disponibles.
+- `Enviar(destinatario, mensaje)`: envía un mensaje a un contacto o grupo resolviendo nombre, teléfono o JID.
+    - `destinatario`: nombre, teléfono o JID del contacto o grupo.
+    - `mensaje`: contenido del mensaje.
+- `Invitar(grupo, usuarios)`: invita uno o más usuarios a un grupo.
+- `Grupos()`: devuelve la lista de grupos disponibles.
+    - `grupo`: grupo destino.
+    - `usuarios`: usuarios a invitar.
+- `Participantes(grupo)`: obtiene los participantes de un grupo.
+    - `grupo`: grupo a consultar.
+- `Mensajes(referencia, desde, hasta)`: devuelve los mensajes de una conversación filtrando opcionalmente por rango de fechas.
+    - `referencia`: contacto, grupo, teléfono o JID.
+    - `desde`: fecha/hora inicial opcional.
+    - `hasta`: fecha/hora final opcional.
+
+*/
+class WAppService {
     readonly string? store;
     readonly TimeSpan timeout;
-    bool gruposHabilitados = true;
+    bool sincronizacionHabilitada = true;
     List<GrupoWhatsApp> grupos = new();
 
-    public WAppService(string? store = null, TimeSpan? timeout = null, bool refrescarGrupos = true)
-    {
+    public WAppService(string? store = null, TimeSpan? timeout = null, bool refrescarGrupos = true) {
         this.store = store;
         this.timeout = timeout ?? TimeSpan.FromMinutes(5);
 
-        try
-        {
-            CargarGrupos(refrescarGrupos);
-        }
-        catch (InvalidOperationException ex) when (EsErrorAutenticacionWacli(ex))
-        {
-            gruposHabilitados = false;
-            grupos = new();
-            Console.WriteLine("Aviso: wacli no está autenticado; se omite la carga de grupos.");
-        }
+        Sincronizar(refrescarGrupos);
     }
 
-    public void EnviarMensajeAGrupo(string grupo, string mensaje, bool json = false)
-    {
-        string grupoJid = ResolverJidGrupo(grupo);
-        EnviarTexto(grupoJid, mensaje, json);
-    }
-
-    public void EnviarTexto(string destinatario, string mensaje, bool json = false)
-    {
-        if (string.IsNullOrWhiteSpace(destinatario))
-        {
+    public void Enviar(string destinatario, string mensaje) {
+        if (string.IsNullOrWhiteSpace(destinatario)) {
             throw new ArgumentException("El destinatario no puede estar vacío.", nameof(destinatario));
         }
 
-        if (string.IsNullOrWhiteSpace(mensaje))
-        {
+        if (string.IsNullOrWhiteSpace(mensaje)) {
             throw new ArgumentException("El mensaje no puede estar vacío.", nameof(mensaje));
         }
 
-        List<string> argumentos = new() { "send", "text", "--to", destinatario, "--message", mensaje };
-        Ejecutar(json, argumentos);
+        string destino = ResolverDestinoMensaje(destinatario);
+        List<string> argumentos = new() { "send", "text", "--to", destino, "--message", mensaje };
+        Ejecutar(argumentos);
     }
 
-    public void InvitarParticipanteAGrupo(string grupo, params string[] usuarios)
-    {
-        InvitarParticipantesAGrupo(grupo, false, usuarios);
-    }
 
-    public void InvitarParticipantesAGrupo(string grupo, bool json, params string[] usuarios)
-    {
-        if (string.IsNullOrWhiteSpace(grupo))
-        {
+    public void Invitar(string grupo, params string[] contactos) {
+
+        if (string.IsNullOrWhiteSpace(grupo)) {
             throw new ArgumentException("El grupo no puede estar vacío.", nameof(grupo));
         }
 
-        if (usuarios is null || usuarios.Length == 0)
-        {
-            throw new ArgumentException("Debes indicar al menos un participante.", nameof(usuarios));
+        if (contactos is null || contactos.Length == 0) {
+            throw new ArgumentException("Debes indicar al menos un participante.", nameof(contactos));
         }
 
         string grupoJid = ResolverJidGrupo(grupo);
         List<string> argumentos = new() { "groups", "participants", "add", "--jid", grupoJid };
 
-        foreach (string usuario in usuarios)
-        {
-            if (string.IsNullOrWhiteSpace(usuario))
-            {
+        foreach (string usuario in contactos) {
+            if (string.IsNullOrWhiteSpace(usuario)) {
                 continue;
             }
 
@@ -77,201 +75,182 @@ class WAppService
             argumentos.Add(usuario);
         }
 
-        if (!argumentos.Any(argumento => argumento == "--user"))
-        {
-            throw new ArgumentException("Debes indicar al menos un participante válido.", nameof(usuarios));
+        if (!argumentos.Any(argumento => argumento == "--user")) {
+            throw new ArgumentException("Debes indicar al menos un participante válido.", nameof(contactos));
         }
 
-        Ejecutar(json, argumentos);
+        Ejecutar(argumentos);
     }
 
-    public void InvitarGrupoComision(IEnumerable<Alumno> alumnos, bool json = false)
-    {
-        if (alumnos is null)
-        {
-            throw new ArgumentNullException(nameof(alumnos));
-        }
-
-        List<Alumno> alumnosValidos = alumnos
-            .Where(alumno =>
-                !string.IsNullOrWhiteSpace(alumno.Comision) &&
-                !string.IsNullOrWhiteSpace(alumno.TelefonoId))
-            .ToList();
-
-        foreach (IGrouping<string, Alumno> grupoComision in alumnosValidos
-            .GroupBy(alumno => ObtenerReferenciaGrupoPorComision(alumno.Comision))
-            .OrderBy(grupo => grupo.Key, StringComparer.OrdinalIgnoreCase))
-        {
-            string[] usuarios = grupoComision
-                .Select(alumno => alumno.TelefonoId)
-                .Where(telefono => !string.IsNullOrWhiteSpace(telefono))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-
-            if (usuarios.Length == 0)
-            {
-                continue;
+    void Sincronizar(bool refrescarRemoto=true) {
+        if (refrescarRemoto && sincronizacionHabilitada) {
+            try {
+                Ejecutar(new() { "groups", "refresh" });
             }
-
-            Console.WriteLine($"Invitando {usuarios.Length} alumno(s) al grupo {grupoComision.Key}...");
-            InvitarParticipantesAGrupo(grupoComision.Key, json, usuarios);
+            catch (InvalidOperationException ex) when (EsErrorAutenticacionWacli(ex)) {
+                sincronizacionHabilitada = false;
+                Console.WriteLine("Aviso: wacli no está autenticado; se usa la base local para grupos y contactos.");
+            }
         }
+
+        grupos = ListarGruposDesdeBaseLocal();
     }
 
-    public List<ContactoWhatsApp> ListarParticipantesGrupo(string grupo, bool refrescar = false)
-    {
-        if (string.IsNullOrWhiteSpace(grupo))
-        {
+    public List<ContactoWhatsApp> Participantes(string grupo) {
+        if (string.IsNullOrWhiteSpace(grupo)) {
             throw new ArgumentException("El grupo no puede estar vacío.", nameof(grupo));
         }
 
-        string grupoJid = ResolverJidGrupoParaLectura(grupo, refrescar);
-
-        if (refrescar && gruposHabilitados)
-        {
-            try
-            {
-                EjecutarYObtenerSalida(false, new() { "groups", "info", "--jid", grupoJid });
-            }
-            catch (InvalidOperationException ex) when (EsErrorAutenticacionWacli(ex))
-            {
-                gruposHabilitados = false;
-                grupos = new();
-                Console.WriteLine("Aviso: wacli no está autenticado; se usan los participantes de la base local.");
-            }
+        string? grupoJid = BuscarJidGrupoEnBaseLocal(grupo);
+        if (string.IsNullOrWhiteSpace(grupoJid)) {
+            throw new InvalidOperationException($"No se encontró ningún grupo para '{grupo}'.");
         }
 
         return ListarParticipantesDesdeBaseLocal(grupoJid);
     }
 
-    public string? BuscarJidGrupoPorDescripcion(string descripcion, bool refrescar = false)
-    {
-        if (string.IsNullOrWhiteSpace(descripcion))
-        {
-            throw new ArgumentException("La descripción no puede estar vacía.", nameof(descripcion));
-        }
-
-        GrupoWhatsApp? grupo = BuscarGrupoPorReferencia(descripcion, refrescar);
-        return grupo?.Jid;
-    }
-
-    public void RecargarGrupos()
-    {
-        if (!gruposHabilitados)
-        {
-            Console.WriteLine("Aviso: no se pueden recargar grupos porque wacli no está autenticado.");
-            return;
-        }
-
-        CargarGrupos(true);
-    }
-
-    public List<GrupoWhatsApp> ListarGrupos(bool refrescar = false)
-    {
-        if (!gruposHabilitados)
-        {
-            return new();
-        }
-
-        if (refrescar || grupos.Count == 0)
-        {
-            CargarGrupos(refrescar);
+    public List<GrupoWhatsApp> Grupos() {
+        if (grupos.Count == 0) {
+            grupos = ListarGruposDesdeBaseLocal();
         }
 
         return new(grupos);
     }
 
-    string ResolverJidGrupo(string grupo)
-    {
-        if (string.IsNullOrWhiteSpace(grupo))
-        {
+    public List<MensajeWhatsApp> Mensajes(string referencia, DateTime? desde = null, DateTime? hasta = null) {
+        if (string.IsNullOrWhiteSpace(referencia)) {
+            throw new ArgumentException("La referencia no puede estar vacía.", nameof(referencia));
+        }
+
+        if (desde.HasValue && hasta.HasValue && desde.Value > hasta.Value) {
+            throw new ArgumentException("La fecha inicial no puede ser mayor que la fecha final.", nameof(desde));
+        }
+
+        string chatJid = ResolverDestinoMensaje(referencia);
+        return ListarMensajesDesdeBaseLocal(chatJid, desde, hasta);
+    }
+
+    string ResolverJidGrupo(string grupo) {
+        if (string.IsNullOrWhiteSpace(grupo)) {
             throw new ArgumentException("El grupo no puede estar vacío.", nameof(grupo));
         }
 
         string referencia = grupo.Trim();
 
-        if (EsJidGrupo(referencia))
-        {
+        if (EsJidGrupo(referencia)) {
             return referencia;
-        }
-
-        GrupoWhatsApp? coincidencia = BuscarGrupoPorReferencia(referencia, false);
-        if (coincidencia != null)
-        {
-            return coincidencia.Jid;
-        }
-
-        coincidencia = BuscarGrupoPorReferencia(referencia, true);
-        if (coincidencia != null)
-        {
-            return coincidencia.Jid;
-        }
-
-        throw new InvalidOperationException($"No se encontró ningún grupo para '{referencia}'.");
-    }
-
-    string ResolverJidGrupoParaLectura(string grupo, bool refrescar)
-    {
-        string referencia = grupo.Trim();
-
-        if (EsJidGrupo(referencia))
-        {
-            return referencia;
-        }
-
-        if (gruposHabilitados)
-        {
-            GrupoWhatsApp? coincidencia = BuscarGrupoPorReferencia(referencia, refrescar);
-            if (coincidencia != null)
-            {
-                return coincidencia.Jid;
-            }
         }
 
         string? grupoJid = BuscarJidGrupoEnBaseLocal(referencia);
-        if (!string.IsNullOrWhiteSpace(grupoJid))
-        {
+        if (!string.IsNullOrWhiteSpace(grupoJid)) {
             return grupoJid;
         }
 
         throw new InvalidOperationException($"No se encontró ningún grupo para '{referencia}'.");
     }
 
-    string? BuscarJidGrupoEnBaseLocal(string referencia)
-    {
-        string valor = EscaparSqlite(referencia.Trim());
+    string ResolverDestinoMensaje(string destinatario) {
+        if (string.IsNullOrWhiteSpace(destinatario)) {
+            throw new ArgumentException("El destinatario no puede estar vacío.", nameof(destinatario));
+        }
+
+        string referencia = destinatario.Trim();
+
+        if (EsJidWhatsapp(referencia) || EsJidGrupo(referencia)) {
+            return referencia;
+        }
+
+        if (EsReferenciaTelefonica(referencia)) {
+            return FormatearTelefonoJid(referencia);
+        }
+
+        string? grupoJid = BuscarJidGrupoEnBaseLocal(referencia);
+        if (!string.IsNullOrWhiteSpace(grupoJid)) {
+            return grupoJid;
+        }
+
+        ContactoWhatsApp? coincidencia = BuscarContactoPorReferenciaEnBaseLocal(referencia);
+        if (coincidencia != null) {
+            return coincidencia.Jid;
+        }
+
+        throw new InvalidOperationException($"No se encontró ningún destino para '{referencia}'.");
+    }
+
+    string? BuscarJidGrupoEnBaseLocal(string referencia) {
+        string valor = EscaparSqlite(referencia);
 
         List<string> coincidenciasExactas = EjecutarSqlite(
             $"SELECT jid FROM groups WHERE lower(name) = lower('{valor}') OR lower(jid) = lower('{valor}') ORDER BY name, jid;");
 
-        if (coincidenciasExactas.Count == 1)
-        {
+        if (coincidenciasExactas.Count == 1) {
             return coincidenciasExactas[0];
         }
 
-        if (coincidenciasExactas.Count > 1)
-        {
+        if (coincidenciasExactas.Count > 1) {
             throw new InvalidOperationException($"La referencia exacta '{referencia}' coincide con varios grupos locales.");
         }
 
         List<string> coincidenciasParciales = EjecutarSqlite(
             $"SELECT jid FROM groups WHERE lower(name) LIKE lower('%{valor}%') OR lower(jid) LIKE lower('%{valor}%') ORDER BY name, jid;");
 
-        if (coincidenciasParciales.Count == 1)
-        {
+        if (coincidenciasParciales.Count == 1) {
             return coincidenciasParciales[0];
         }
 
-        if (coincidenciasParciales.Count > 1)
-        {
+        if (coincidenciasParciales.Count > 1) {
             throw new InvalidOperationException($"La búsqueda '{referencia}' coincide con varios grupos locales.");
         }
 
         return null;
     }
 
-    List<ContactoWhatsApp> ListarParticipantesDesdeBaseLocal(string grupoJid)
-    {
+    ContactoWhatsApp? BuscarContactoPorReferenciaEnBaseLocal(string referencia) {
+        string valor = EscaparSqlite(referencia);
+
+        List<ContactoWhatsApp> coincidenciasExactas = EjecutarSqlite(EjecutarSqliteConSessionDb(ConstruirConsultaContactos(
+            $"lower(nombre) = lower('{valor}') OR lower(jid) = lower('{valor}') OR lower(telefono) = lower('{valor}')")))
+            .Select(ParsearContactoWhatsApp)
+            .GroupBy(contacto => contacto.Jid, StringComparer.OrdinalIgnoreCase)
+            .Select(grupo => grupo.First())
+            .ToList();
+
+        if (coincidenciasExactas.Count == 1) {
+            return coincidenciasExactas[0];
+        }
+
+        if (coincidenciasExactas.Count > 1) {
+            string nombres = string.Join(", ", coincidenciasExactas.Select(contacto => $"{contacto.Name} ({contacto.Jid})"));
+            throw new InvalidOperationException($"La referencia exacta '{referencia}' coincide con varios contactos: {nombres}");
+        }
+
+        List<ContactoWhatsApp> coincidenciasParciales = EjecutarSqlite(EjecutarSqliteConSessionDb(ConstruirConsultaContactos(
+            $"lower(nombre) LIKE lower('%{valor}%') OR lower(jid) LIKE lower('%{valor}%') OR lower(telefono) LIKE lower('%{valor}%')")))
+            .Select(ParsearContactoWhatsApp)
+            .GroupBy(contacto => contacto.Jid, StringComparer.OrdinalIgnoreCase)
+            .Select(grupo => grupo.First())
+            .ToList();
+
+        if (coincidenciasParciales.Count == 1) {
+            return coincidenciasParciales[0];
+        }
+
+        if (coincidenciasParciales.Count > 1) {
+            string nombres = string.Join(", ", coincidenciasParciales.Select(contacto => $"{contacto.Name} ({contacto.Jid})"));
+            throw new InvalidOperationException($"La búsqueda '{referencia}' coincide con varios contactos: {nombres}");
+        }
+
+        return null;
+    }
+
+    List<GrupoWhatsApp> ListarGruposDesdeBaseLocal() {
+        return EjecutarSqlite(
+            "SELECT COALESCE(name, '') || char(9) || jid FROM groups ORDER BY name, jid;")
+            .Select(ParsearGrupoWhatsApp)
+            .ToList();
+    }
+
+    List<ContactoWhatsApp> ListarParticipantesDesdeBaseLocal(string grupoJid) {
         string jid = EscaparSqlite(grupoJid);
         string rutaSessionDb = EscaparSqlite(Path.Combine(ObtenerDirectorioStore(), "session.db"));
 
@@ -315,31 +294,75 @@ class WAppService
         return filas.Select(ParsearContactoWhatsApp).ToList();
     }
 
-    static ContactoWhatsApp ParsearContactoWhatsApp(string fila)
-    {
+    List<MensajeWhatsApp> ListarMensajesDesdeBaseLocal(string chatJid, DateTime? desde, DateTime? hasta) {
+        string jid = EscaparSqlite(chatJid);
+        List<string> condiciones = new() { $"chat_jid = '{jid}'" };
+
+        if (desde.HasValue) {
+            condiciones.Add($"ts >= {ConvertirFechaAUnix(desde.Value)}");
+        }
+
+        if (hasta.HasValue) {
+            condiciones.Add($"ts <= {ConvertirFechaAUnix(hasta.Value)}");
+        }
+
+        List<string> filas = EjecutarSqlite(
+            $"SELECT ts || char(9) || COALESCE(sender_jid, '') || char(9) || COALESCE(sender_name, '') || char(9) || COALESCE(NULLIF(display_text, ''), NULLIF(text, ''), '') || char(9) || from_me FROM messages WHERE {string.Join(" AND ", condiciones)} ORDER BY ts;");
+
+        return filas.Select(ParsearMensajeWhatsApp).ToList();
+    }
+
+    static ContactoWhatsApp ParsearContactoWhatsApp(string fila) {
         string[] partes = fila.Split('\t');
 
         string jid = partes.Length > 0 ? partes[0].Trim() : string.Empty;
         string nombre = partes.Length > 1 ? partes[1].Trim() : string.Empty;
         string telefono = partes.Length > 2 ? partes[2].Trim() : string.Empty;
 
-        if (string.IsNullOrWhiteSpace(nombre))
-        {
+        if (string.IsNullOrWhiteSpace(nombre)) {
             nombre = jid;
         }
 
-        if (string.IsNullOrWhiteSpace(telefono))
-        {
+        if (string.IsNullOrWhiteSpace(telefono)) {
             telefono = ExtraerTelefonoDesdeJid(jid);
         }
 
         return new(jid, nombre, telefono);
     }
 
-    static string ExtraerTelefonoDesdeJid(string jid)
-    {
-        if (string.IsNullOrWhiteSpace(jid))
-        {
+    static GrupoWhatsApp ParsearGrupoWhatsApp(string fila) {
+        string[] partes = fila.Split('\t');
+
+        string group = partes.Length > 0 ? partes[0].Trim() : string.Empty;
+        string jid = partes.Length > 1 ? partes[1].Trim() : string.Empty;
+
+        if (string.IsNullOrWhiteSpace(group)) {
+            group = jid;
+        }
+
+        return new(jid, group, null);
+    }
+
+    static MensajeWhatsApp ParsearMensajeWhatsApp(string fila) {
+        string[] partes = fila.Split('\t');
+
+        long ts = partes.Length > 0 && long.TryParse(partes[0].Trim(), out long valorTs) ? valorTs : 0;
+        string senderJid = partes.Length > 1 ? partes[1].Trim() : string.Empty;
+        string senderName = partes.Length > 2 ? partes[2].Trim() : string.Empty;
+        string content = partes.Length > 3 ? partes[3].Trim() : string.Empty;
+        bool fromMe = partes.Length > 4 && (partes[4].Trim() == "1" || partes[4].Trim().Equals("true", StringComparison.OrdinalIgnoreCase));
+
+        DateTime fecha = ConvertirUnixAFechaLocal(ts);
+
+        if (string.IsNullOrWhiteSpace(senderName)) {
+            senderName = senderJid;
+        }
+
+        return new(fecha, senderJid, senderName, content, fromMe);
+    }
+
+    static string ExtraerTelefonoDesdeJid(string jid) {
+        if (string.IsNullOrWhiteSpace(jid)) {
             return string.Empty;
         }
 
@@ -349,18 +372,116 @@ class WAppService
         return candidato.All(char.IsDigit) ? candidato : string.Empty;
     }
 
-    List<string> EjecutarSqlite(string query)
-    {
+    static bool EsJidWhatsapp(string texto) {
+        return texto.EndsWith("@g.us", StringComparison.OrdinalIgnoreCase) ||
+               texto.EndsWith("@s.whatsapp.net", StringComparison.OrdinalIgnoreCase) ||
+               texto.EndsWith("@lid", StringComparison.OrdinalIgnoreCase);
+    }
+
+    static bool EsReferenciaTelefonica(string texto) {
+        string sinFormato = Regex.Replace(texto, @"[\d\s\-\+\(\)]", string.Empty);
+        string digitos = Regex.Replace(texto, @"\D", string.Empty);
+
+        return string.IsNullOrWhiteSpace(sinFormato) && !string.IsNullOrWhiteSpace(digitos);
+    }
+
+    static string FormatearTelefonoJid(string telefono) {
+        string digitos = Regex.Replace(telefono.Trim(), @"\D", string.Empty);
+
+        if (string.IsNullOrWhiteSpace(digitos)) {
+            throw new InvalidOperationException($"No se pudo resolver el teléfono '{telefono}'.");
+        }
+
+        if (digitos.StartsWith("54")) {
+            if (!digitos.StartsWith("549")) {
+                digitos = $"549{digitos.Substring(2)}";
+            }
+        }
+        else {
+            if (digitos.StartsWith("0")) {
+                digitos = digitos.Substring(1);
+            }
+
+            digitos = $"549{digitos}";
+        }
+
+        return $"{digitos}@s.whatsapp.net";
+    }
+
+    static DateTime ConvertirUnixAFechaLocal(long unixSeconds) {
+        if (unixSeconds <= 0) {
+            return DateTime.UnixEpoch;
+        }
+
+        return DateTimeOffset.FromUnixTimeSeconds(unixSeconds).LocalDateTime;
+    }
+
+    static long ConvertirFechaAUnix(DateTime fecha) {
+        DateTimeOffset offset = fecha.Kind switch {
+            DateTimeKind.Utc => new DateTimeOffset(fecha, TimeSpan.Zero),
+            DateTimeKind.Local => new DateTimeOffset(fecha),
+            _ => new DateTimeOffset(DateTime.SpecifyKind(fecha, DateTimeKind.Local))
+        };
+
+        return offset.ToUnixTimeSeconds();
+    }
+
+    static string ConstruirConsultaContactos(string whereClause) {
+        return $@"ATTACH DATABASE '{{SESSION_DB}}' AS session;
+                WITH candidatos AS (
+                    SELECT DISTINCT
+                        COALESCE(NULLIF(c.jid, ''), CASE WHEN NULLIF(c.phone, '') IS NOT NULL THEN c.phone || '@s.whatsapp.net' END) AS jid,
+                        COALESCE(
+                            NULLIF(ca.alias, ''),
+                            NULLIF(c.full_name, ''),
+                            NULLIF(c.push_name, ''),
+                            NULLIF(c.business_name, ''),
+                            NULLIF(c.first_name, ''),
+                            NULLIF(c.phone, ''),
+                            NULLIF(c.jid, '')
+                        ) AS nombre,
+                        COALESCE(NULLIF(c.phone, ''), '') AS telefono
+                    FROM contacts c
+                    LEFT JOIN contact_aliases ca
+                        ON ca.jid = c.jid
+                        OR ca.jid = c.phone || '@s.whatsapp.net'
+
+                    UNION
+
+                    SELECT DISTINCT
+                        COALESCE(NULLIF(sc.their_jid, ''), CASE WHEN NULLIF(sc.redacted_phone, '') IS NOT NULL THEN sc.redacted_phone || '@s.whatsapp.net' END) AS jid,
+                        COALESCE(
+                            NULLIF(ca.alias, ''),
+                            NULLIF(sc.full_name, ''),
+                            NULLIF(sc.push_name, ''),
+                            NULLIF(sc.business_name, ''),
+                            NULLIF(sc.first_name, ''),
+                            NULLIF(sc.redacted_phone, ''),
+                            NULLIF(sc.their_jid, '')
+                        ) AS nombre,
+                        COALESCE(NULLIF(sc.redacted_phone, ''), '') AS telefono
+                    FROM session.whatsmeow_contacts sc
+                    LEFT JOIN contact_aliases ca
+                        ON ca.jid = sc.their_jid
+                        OR ca.jid = sc.redacted_phone || '@s.whatsapp.net'
+                )
+                SELECT DISTINCT
+                    jid || char(9) || COALESCE(nombre, jid, '') || char(9) || COALESCE(telefono, '')
+                FROM candidatos
+                WHERE jid IS NOT NULL
+                    AND jid <> ''
+                    AND ({whereClause});";
+    }
+
+    List<string> EjecutarSqlite(string query) {
         string rutaDb = Path.Combine(ObtenerDirectorioStore(), "wacli.db");
 
-        if (!File.Exists(rutaDb))
-        {
+        if (!File.Exists(rutaDb)) {
             Console.WriteLine($"Aviso: no existe la base local de wacli: {rutaDb}");
             return new();
         }
 
-        ProcessStartInfo startInfo = new ProcessStartInfo
-        {
+        ProcessStartInfo startInfo = new ProcessStartInfo {
             FileName = "sqlite3",
             RedirectStandardInput = false,
             RedirectStandardOutput = true,
@@ -380,8 +501,7 @@ class WAppService
 
         proceso.WaitForExit();
 
-        if (proceso.ExitCode != 0)
-        {
+        if (proceso.ExitCode != 0) {
             string detalle = string.IsNullOrWhiteSpace(error) ? salida : error;
             throw new InvalidOperationException($"sqlite3 falló con código {proceso.ExitCode}: {detalle}");
         }
@@ -392,173 +512,42 @@ class WAppService
                      .ToList();
     }
 
-    string ObtenerDirectorioStore()
-    {
+    string ObtenerDirectorioStore() {
         string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        if (string.IsNullOrWhiteSpace(store))
-        {
+        if (string.IsNullOrWhiteSpace(store)) {
             return Path.Combine(home, ".wacli");
         }
 
-        if (store == "~")
-        {
+        if (store == "~") {
             return home;
         }
 
-        if (store.StartsWith("~/", StringComparison.Ordinal))
-        {
+        if (store.StartsWith("~/", StringComparison.Ordinal)) {
             return Path.Combine(home, store.Substring(2));
         }
 
         return Environment.ExpandEnvironmentVariables(store);
     }
 
-    static string EscaparSqlite(string valor)
-    {
-        return valor.Replace("'", "''");
+    static string EscaparSqlite(string valor) {
+        return valor.Trim().Replace("'", "''");
     }
 
-    GrupoWhatsApp? BuscarGrupoPorReferencia(string referencia, bool refrescar)
-    {
-        string textoBuscado = referencia.Trim();
-        List<GrupoWhatsApp> gruposDisponibles = ListarGrupos(refrescar);
-
-        List<GrupoWhatsApp> coincidenciasExactas = gruposDisponibles
-            .Where(grupo =>
-                string.Equals(grupo.Nombre, textoBuscado, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(grupo.Jid, textoBuscado, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        if (coincidenciasExactas.Count == 1)
-        {
-            return coincidenciasExactas[0];
-        }
-
-        if (coincidenciasExactas.Count > 1)
-        {
-            string nombres = string.Join(", ", coincidenciasExactas.Select(grupo => $"{grupo.Nombre} ({grupo.Jid})"));
-            throw new InvalidOperationException($"La referencia exacta '{textoBuscado}' coincide con varios grupos: {nombres}");
-        }
-
-        List<GrupoWhatsApp> coincidenciasParciales = gruposDisponibles
-            .Where(grupo =>
-                grupo.Nombre.Contains(textoBuscado, StringComparison.OrdinalIgnoreCase) ||
-                grupo.Jid.Contains(textoBuscado, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        if (coincidenciasParciales.Count == 1)
-        {
-            return coincidenciasParciales[0];
-        }
-
-        if (coincidenciasParciales.Count > 1)
-        {
-            string nombres = string.Join(", ", coincidenciasParciales.Select(grupo => $"{grupo.Nombre} ({grupo.Jid})"));
-            throw new InvalidOperationException($"La búsqueda '{textoBuscado}' coincide con varios grupos: {nombres}");
-        }
-
-        return null;
-    }
-
-    void CargarGrupos(bool refrescar)
-    {
-        if (!gruposHabilitados)
-        {
-            grupos = new();
-            return;
-        }
-
-        if (refrescar)
-        {
-            Ejecutar(false, new() { "groups", "refresh" });
-        }
-
-        string salida = EjecutarYObtenerSalida(false, new() { "groups", "list" });
-        grupos = ParsearGrupos(salida);
-    }
-
-    static bool EsJidGrupo(string texto)
-    {
+    static bool EsJidGrupo(string texto) {
         return texto.EndsWith("@g.us", StringComparison.OrdinalIgnoreCase);
     }
 
-    static string ObtenerReferenciaGrupoPorComision(string comision)
-    {
-        string valor = comision.Trim();
+    void Ejecutar(List<string> argumentos) {
+        string salida = EjecutarYObtenerSalida(argumentos);
 
-        if (string.IsNullOrWhiteSpace(valor))
-        {
-            throw new ArgumentException("La comisión no puede estar vacía.", nameof(comision));
-        }
-
-        if (EsJidGrupo(valor))
-        {
-            return valor;
-        }
-
-        if (valor.StartsWith("TUP26-P3-", StringComparison.OrdinalIgnoreCase))
-        {
-            return valor;
-        }
-
-        return $"TUP26-P3-{valor}";
-    }
-
-    static List<GrupoWhatsApp> ParsearGrupos(string salida)
-    {
-        List<GrupoWhatsApp> grupos = new();
-
-        foreach (string linea in salida.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
-        {
-            string actual = linea.Trim();
-
-            if (string.IsNullOrWhiteSpace(actual) || actual.StartsWith("NAME", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            string[] columnas = Regex.Split(actual, @"\s{2,}");
-            if (columnas.Length < 3)
-            {
-                continue;
-            }
-
-            string nombre = columnas[0].Trim();
-            string jid = columnas[1].Trim();
-            string creado = columnas[2].Trim();
-
-            if (!jid.EndsWith("@g.us", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            DateTime? fechaCreacion = null;
-            if (DateTime.TryParse(creado, out DateTime fecha))
-            {
-                fechaCreacion = fecha;
-            }
-
-            grupos.Add(new(nombre, jid, fechaCreacion));
-        }
-
-        return grupos;
-    }
-
-    void Ejecutar(bool json, List<string> argumentos)
-    {
-        string salida = EjecutarYObtenerSalida(json, argumentos);
-
-        if (!string.IsNullOrWhiteSpace(salida))
-        {
+        if (!string.IsNullOrWhiteSpace(salida)) {
             Console.WriteLine(salida);
         }
     }
 
-    string EjecutarYObtenerSalida(bool json, List<string> argumentos)
-    {
-        ProcessStartInfo startInfo = new ProcessStartInfo
-        {
+    string EjecutarYObtenerSalida(List<string> argumentos) {
+        ProcessStartInfo startInfo = new ProcessStartInfo {
             FileName = "wacli",
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
@@ -567,13 +556,7 @@ class WAppService
             CreateNoWindow = true
         };
 
-        if (json)
-        {
-            startInfo.ArgumentList.Add("--json");
-        }
-
-        if (!string.IsNullOrWhiteSpace(store))
-        {
+        if (!string.IsNullOrWhiteSpace(store)) {
             startInfo.ArgumentList.Add("--store");
             startInfo.ArgumentList.Add(store);
         }
@@ -581,8 +564,7 @@ class WAppService
         startInfo.ArgumentList.Add("--timeout");
         startInfo.ArgumentList.Add(FormatearDuracionWacli(timeout));
 
-        foreach (string argumento in argumentos)
-        {
+        foreach (string argumento in argumentos) {
             startInfo.ArgumentList.Add(argumento);
         }
 
@@ -591,14 +573,11 @@ class WAppService
 
         proceso.StandardInput.Close();
 
-        if (!proceso.WaitForExit((int)timeout.TotalMilliseconds))
-        {
-            try
-            {
+        if (!proceso.WaitForExit((int)timeout.TotalMilliseconds)) {
+            try {
                 proceso.Kill(entireProcessTree: true);
             }
-            catch
-            {
+            catch {
                 // Ignoramos errores al intentar detener el proceso.
             }
 
@@ -608,8 +587,7 @@ class WAppService
         string salida = proceso.StandardOutput.ReadToEnd().Trim();
         string error = proceso.StandardError.ReadToEnd().Trim();
 
-        if (proceso.ExitCode != 0)
-        {
+        if (proceso.ExitCode != 0) {
             string detalle = string.IsNullOrWhiteSpace(error) ? salida : error;
             throw new InvalidOperationException($"wacli falló con código {proceso.ExitCode}: {detalle}");
         }
@@ -617,20 +595,21 @@ class WAppService
         return salida;
     }
 
-    static string FormatearDuracionWacli(TimeSpan duracion)
-    {
-        if (duracion <= TimeSpan.Zero)
-        {
+    string EjecutarSqliteConSessionDb(string query) {
+        string rutaSessionDb = EscaparSqlite(Path.Combine(ObtenerDirectorioStore(), "session.db"));
+        return query.Replace("{SESSION_DB}", rutaSessionDb, StringComparison.Ordinal);
+    }
+
+    static string FormatearDuracionWacli(TimeSpan duracion) {
+        if (duracion <= TimeSpan.Zero) {
             return "1s";
         }
 
-        if (duracion.TotalSeconds < 60 && duracion.TotalSeconds == Math.Floor(duracion.TotalSeconds))
-        {
+        if (duracion.TotalSeconds < 60 && duracion.TotalSeconds == Math.Floor(duracion.TotalSeconds)) {
             return $"{(int)duracion.TotalSeconds}s";
         }
 
-        if (duracion.TotalMinutes < 60 && duracion.TotalSeconds % 60 == 0)
-        {
+        if (duracion.TotalMinutes < 60 && duracion.TotalSeconds % 60 == 0) {
             return $"{(int)duracion.TotalMinutes}m";
         }
 
@@ -640,27 +619,27 @@ class WAppService
 
         StringBuilder sb = new();
 
-        if (horas > 0)
-        {
+        if (horas > 0) {
             sb.Append($"{horas}h");
         }
 
-        if (minutos > 0)
-        {
+        if (minutos > 0) {
             sb.Append($"{minutos}m");
         }
 
-        if (segundos > 0 || sb.Length == 0)
-        {
+        if (segundos > 0 || sb.Length == 0) {
             sb.Append($"{segundos}s");
         }
 
         return sb.ToString();
     }
 
-    static bool EsErrorAutenticacionWacli(Exception ex)
-    {
+    static bool EsErrorAutenticacionWacli(Exception ex) {
         return ex.Message.Contains("not authenticated", StringComparison.OrdinalIgnoreCase) ||
                ex.Message.Contains("auth", StringComparison.OrdinalIgnoreCase);
     }
 }
+
+record ContactoWhatsApp(string Jid, string Name, string PhoneNumber);
+record GrupoWhatsApp(string Jid, string Group, DateTime? Creado);
+record MensajeWhatsApp(DateTime Fecha, string SenderJid, string SenderName, string Content, bool FromMe);

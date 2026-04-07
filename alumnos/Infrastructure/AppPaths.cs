@@ -1,13 +1,11 @@
 namespace Tup26.AlumnosApp;
 
-static class AppPaths
-{
+static class AppPaths {
     static readonly string dataDirectory = ResolverDirectorioDatos();
 
     public static string DataDirectory => dataDirectory;
 
-    public static string RepoRoot =>
-        Directory.GetParent(DataDirectory)?.FullName ?? DataDirectory;
+    public static string RepoRoot => Directory.GetParent(DataDirectory)?.FullName ?? DataDirectory;
 
     public static string ArchivoAlumnos => Path.Combine(DataDirectory, "alumnos.md");
 
@@ -17,13 +15,10 @@ static class AppPaths
 
     public static string EnunciadosDirectory => Path.Combine(RepoRoot, "enunciados");
 
-    static string ResolverDirectorioDatos()
-    {
-        foreach (string candidato in ObtenerCandidatos())
-        {
+    static string ResolverDirectorioDatos() {
+        foreach (string candidato in ObtenerCandidatos()) {
             string? encontrado = BuscarDirectorioDatos(candidato);
-            if (!string.IsNullOrWhiteSpace(encontrado))
-            {
+            if (!string.IsNullOrWhiteSpace(encontrado)) {
                 return encontrado;
             }
         }
@@ -31,28 +26,23 @@ static class AppPaths
         return Directory.GetCurrentDirectory();
     }
 
-    static IEnumerable<string> ObtenerCandidatos()
-    {
+    static IEnumerable<string> ObtenerCandidatos() {
         string actual = Directory.GetCurrentDirectory();
         yield return actual;
 
         string subdirectorioAlumnos = Path.Combine(actual, "alumnos");
-        if (Directory.Exists(subdirectorioAlumnos))
-        {
+        if (Directory.Exists(subdirectorioAlumnos)) {
             yield return subdirectorioAlumnos;
         }
 
         yield return AppContext.BaseDirectory;
     }
 
-    static string? BuscarDirectorioDatos(string rutaInicial)
-    {
+    static string? BuscarDirectorioDatos(string rutaInicial) {
         DirectoryInfo? actual = new DirectoryInfo(rutaInicial);
 
-        while (actual != null)
-        {
-            if (EsDirectorioDatos(actual.FullName))
-            {
+        while (actual != null) {
+            if (EsDirectorioDatos(actual.FullName)) {
                 return actual.FullName;
             }
 
@@ -62,8 +52,7 @@ static class AppPaths
         return null;
     }
 
-    static bool EsDirectorioDatos(string ruta)
-    {
+    static bool EsDirectorioDatos(string ruta) {
         return File.Exists(Path.Combine(ruta, "alumnos.md")) &&
                File.Exists(Path.Combine(ruta, "Alumnos.csproj"));
     }

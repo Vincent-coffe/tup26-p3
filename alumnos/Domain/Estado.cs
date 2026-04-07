@@ -1,8 +1,7 @@
 namespace Tup26.AlumnosApp;
 
 [Flags]
-enum Estado : int
-{
+enum Estado : int {
     Vacio = 0,
     Aprobado = 1,
     Pendiente = 2,

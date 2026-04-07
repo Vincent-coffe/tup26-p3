@@ -1,16 +1,12 @@
 namespace Tup26.AlumnosApp;
 
-static class MensajesService
-{
-    public static void MensajeGithubErroneo()
-    {
+static class MensajesService {
+    public static void MensajeGithubErroneo() {
         Alumnos alumnos = AlumnosManager.CargarAlumnos(AppPaths.ArchivoAlumnos);
 
-        foreach (string comision in new[] { "C7", "C9" })
-        {
+        foreach (string comision in new[] { "C7", "C9" }) {
             Alumnos lista = alumnos.ConGithub(true).EnComision(comision).ConPractico(1, Estado.Revision);
-            if (lista.Count == 0)
-            {
+            if (lista.Count == 0) {
                 continue;
             }
 
@@ -25,8 +21,7 @@ static class MensajesService
             ```
             """);
 
-            foreach (Alumno a in lista)
-            {
+            foreach (Alumno a in lista) {
                 Console.WriteLine($"{a.Legajo}: {a.NombreCompleto,20} {a.GitHub}");
             }
 
@@ -37,15 +32,12 @@ static class MensajesService
         }
     }
 
-    public static void MensajeSinGithub()
-    {
+    public static void MensajeSinGithub() {
         Alumnos alumnos = AlumnosManager.CargarAlumnos(AppPaths.ArchivoAlumnos);
 
-        foreach (string comision in new[] { "C7", "C9" })
-        {
+        foreach (string comision in new[] { "C7", "C9" }) {
             Alumnos lista = alumnos.ConGithub(false).EnComision(comision);
-            if (lista.Count == 0)
-            {
+            if (lista.Count == 0) {
                 continue;
             }
 
@@ -58,8 +50,7 @@ static class MensajesService
             ```
             """);
 
-            foreach (Alumno a in lista)
-            {
+            foreach (Alumno a in lista) {
                 Console.WriteLine($"{a.Legajo}: {a.NombreCompleto}");
             }
 
