@@ -25,6 +25,8 @@ try
     var filasOrdenadas = SortRows(filas, config);
     Console.WriteLine("Ordenamiento completado.");
     Console.WriteLine($" > Registros ordenados: {filasOrdenadas.Count}");
+
+    WriteOutput(headers, filasOrdenadas, config);
 }
 catch (Exception ex)
 {
@@ -200,6 +202,41 @@ object GetValue(Dictionary<string, string> fila, SortField regla)
         return num;
 
     return valor;
+}
+
+void WriteOutput(string[] encabezados, List<Dictionary<string, string>> filas, AppConfig config)
+{
+    var lineasSalida = new List<string>();
+
+    //Agregamos encabezado
+    if (!config.NoHeader)
+    {
+        lineasSalida.Add(string.Join(config.Delimiter, encabezados));
+    }
+
+    //Convertimos cada fila ordenada de nuevo a texto
+    foreach (var fila in filas)
+    {
+        var valoresFila = new List<string>();
+        foreach (var col in encabezados)
+        {
+            valoresFila.Add(fila.ContainsKey(col) ? fila[col] : "");
+        }
+        lineasSalida.Add(string.Join(config.Delimiter, valoresFila));
+    }
+
+    string resultadoFinal = string.Join(Environment.NewLine, lineasSalida);
+
+    if (!string.IsNullOrEmpty(config.OutputFile))
+    {
+        File.WriteAllText(config.OutputFile, resultadoFinal);
+        Console.WriteLine($"\n Los Datos estan guardados en: {config.OutputFile}");
+    }
+    else
+    {
+        Console.WriteLine("\nRESULTADO ORDENADO");
+        Console.WriteLine(resultadoFinal);
+    }
 }
 
 //Modelo de Datos
