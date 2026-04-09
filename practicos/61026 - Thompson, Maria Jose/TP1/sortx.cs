@@ -1,7 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
-// sortx [input [output]] [-b|--by campo[:tipo[:orden]]]...
-//       [-i|--input input] [-o|--output output]
-//       [-d|--delimiter delimitador]
-//       [-nh|--no-header] [-h|--help]
-
-Console.WriteLine($"sortx {string.Join(" ", args)}");
+record CriterioOrden(string Campo, bool EsNumerico, bool EsDescendente);
+record Configuracion(
+    string? ArchivoEntrada,
+    string? ArchivoSalida,
+    string Delimitador,
+    bool SinEncabezado,
+    List<CriterioOrden> Criterios
+);
