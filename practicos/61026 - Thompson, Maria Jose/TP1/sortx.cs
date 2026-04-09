@@ -163,6 +163,21 @@ List<Dictionary<string, string>> OrdenarFilas(List<Dictionary<string, string>> f
     if (encabezadoGuardado != null) datosAOrdenar.Insert(0, encabezadoGuardado);
     return datosAOrdenar;
 }
+string Serializar(List<Dictionary<string, string>> filas, Configuracion config)
+{
+    var sb = new StringBuilder();
+    foreach (var fila in filas)
+    {
+        var valoresFila = new List<string>();
+        foreach (var clave in fila.Keys)
+        {
+            valoresFila.Add(fila[clave]);
+        }
+
+        sb.AppendLine(string.Join(config.Delimitador, valoresFila));
+    }
+    return sb.ToString().TrimEnd();
+}
 
 
 
