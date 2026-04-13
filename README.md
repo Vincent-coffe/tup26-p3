@@ -138,16 +138,16 @@ Los que no han sido presentados deben ser entregados sin errores para ser aproba
 >   dotnet run sortx.cs -- --help
 
 2. Ordenar por apellido
->   dotnet run sortx.cs -- empleados.csv -b apellido
+>   dotnet run sortx.cs -- empleados.csv --by apellido
 
 3. Ordenar por salario descendente
->   dotnet run sortx.cs -- empleados.csv -b salario:num:desc
+>   dotnet run sortx.cs -- empleados.csv --by salario:num:desc
 
 4. Ordenar por departamento y salario descendente
->   dotnet run sortx.cs -- empleados.csv -b departamento -b salario:num:desc
+>   dotnet run sortx.cs -- empleados.csv --by departamento --by salario:num:desc
 
 5. Salida a archivo
->   dotnet run sortx.cs -- empleados.csv -b apellido:alpha:asc -o salida.csv
+>   dotnet run sortx.cs -- empleados.csv --by apellido:alpha:asc --output salida.csv
 
 ### Archivo de entrada (empleados.csv):
 ```text
