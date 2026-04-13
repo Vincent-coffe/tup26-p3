@@ -67,6 +67,128 @@ def _render_plain_code(code: str, language_class: str = "") -> str:
     return f"<pre><code{class_attr}>{html.escape(code)}</code></pre>"
 
 
+def code_language_label(language: str) -> str:
+        lang = language.strip().lower()
+        aliases = {
+                "": "texto",
+                "txt": "texto",
+                "text": "texto",
+                "plaintext": "texto",
+                "cs": "csharp",
+                "shell": "bash",
+                "sh": "bash",
+                "zsh": "bash",
+        }
+        return aliases.get(lang, lang)
+
+
+def wrap_code_block(content: str, language: str) -> str:
+        label = html.escape(code_language_label(language), quote=False)
+        return f"""
+<div class="code-block">
+    <div class="code-block-header">
+        <span class="code-block-language">{label}</span>
+    </div>
+    {content}
+</div>
+""".strip()
+
+
+def split_table_row(line: str) -> list[str]:
+    stripped = line.strip()
+    if stripped.startswith("|"):
+        stripped = stripped[1:]
+    if stripped.endswith("|"):
+        stripped = stripped[:-1]
+
+    cells: list[str] = []
+    current: list[str] = []
+    escaped = False
+
+    for ch in stripped:
+        if escaped:
+            current.append(ch)
+            escaped = False
+            continue
+
+        if ch == "\\":
+            escaped = True
+            continue
+
+        if ch == "|":
+            cells.append("".join(current).strip())
+            current = []
+            continue
+
+        current.append(ch)
+
+    if escaped:
+        current.append("\\")
+
+    cells.append("".join(current).strip())
+    return [cell.replace("\\|", "|") for cell in cells]
+
+
+def is_table_separator(line: str) -> bool:
+    stripped = line.strip().strip("|")
+    if not stripped:
+        return False
+    parts = [part.strip() for part in stripped.split("|")]
+    if not parts:
+        return False
+    for part in parts:
+        if not part or not re.fullmatch(r":?-{3,}:?", part):
+            return False
+    return True
+
+
+def render_table(header_line: str, separator_line: str, rows: list[str]) -> str:
+    headers = split_table_row(header_line)
+    alignments = []
+    for cell in split_table_row(separator_line):
+        left = cell.startswith(":")
+        right = cell.endswith(":")
+        if left and right:
+            alignments.append("center")
+        elif left:
+            alignments.append("left")
+        elif right:
+            alignments.append("right")
+        else:
+            alignments.append("")
+
+    body_rows = [split_table_row(row) for row in rows]
+    column_count = max([len(headers), len(alignments), *(len(row) for row in body_rows)] or [0])
+
+    while len(headers) < column_count:
+        headers.append("")
+    while len(alignments) < column_count:
+        alignments.append("")
+
+    normalized_rows: list[list[str]] = []
+    for row in body_rows:
+        padded = row[:column_count] + [""] * max(0, column_count - len(row))
+        normalized_rows.append(padded)
+
+    def cell_attr(index: int) -> str:
+        align = alignments[index]
+        return f' style="text-align: {align};"' if align else ""
+
+    header_html = "".join(
+        f"<th{cell_attr(index)}>{inline_markdown(headers[index])}</th>"
+        for index in range(column_count)
+    )
+    rows_html = []
+    for row in normalized_rows:
+        cells = "".join(
+            f"<td{cell_attr(index)}>{inline_markdown(row[index])}</td>"
+            for index in range(column_count)
+        )
+        rows_html.append(f"<tr>{cells}</tr>")
+
+    return f"<table>\n<thead><tr>{header_html}</tr></thead>\n<tbody>\n{''.join(rows_html)}\n</tbody>\n</table>"
+
+
 def _highlight_regex(code: str, patterns: list[tuple[str, str]], language_class: str) -> str:
     combined = re.compile("|".join(f"(?P<{name}>{pattern})" for name, pattern in patterns), re.MULTILINE)
     pieces: list[str] = []
@@ -103,7 +225,7 @@ def render_code_block(code: str, language: str) -> str:
             ("keyword", rf"\b(?:{keywords})\b"),
             ("type", r"\b(?:Console|List|File|Directory|Path|Environment|Exception|ConsoleKeyInfo|ConsoleKey)\b"),
         ]
-        return _highlight_regex(code, patterns, "language-csharp")
+        return wrap_code_block(_highlight_regex(code, patterns, "language-csharp"), lang)
 
     if lang in {"bash", "sh", "zsh", "shell"}:
         keywords = "if|then|else|fi|for|in|do|done|case|esac|while|function"
@@ -115,10 +237,10 @@ def render_code_block(code: str, language: str) -> str:
             ("keyword", rf"\b(?:{keywords})\b"),
             ("command", r"^(?:\s*)(?:dotnet|git|cd|ls|cat|rg|sed|python3|bash|zsh|mkdir|cp|mv|rm)\b"),
         ]
-        return _highlight_regex(code, patterns, "language-shell")
+        return wrap_code_block(_highlight_regex(code, patterns, "language-shell"), lang)
 
     language_class = f"language-{lang}" if lang else ""
-    return _render_plain_code(code, language_class)
+    return wrap_code_block(_render_plain_code(code, language_class), lang)
 
 
 def wrap_xhtml_page(title: str, body: str, *, nav: bool = False) -> str:
@@ -181,8 +303,9 @@ def markdown_to_xhtml(markdown_text: str, chapter_title: str, chapter_number: in
             parts.append("</blockquote>")
             in_blockquote = False
 
-    for raw_line in lines:
-        line = raw_line.rstrip("\n")
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip("\n")
         stripped = line.strip()
 
         if stripped.startswith("```"):
@@ -199,16 +322,19 @@ def markdown_to_xhtml(markdown_text: str, chapter_title: str, chapter_number: in
             else:
                 in_code = True
                 code_language = stripped[3:].strip().lower()
+            i += 1
             continue
 
         if in_code:
             code_lines.append(line)
+            i += 1
             continue
 
         if not stripped:
             flush_paragraph()
             close_lists()
             close_blockquote()
+            i += 1
             continue
 
         if stripped == "---":
@@ -216,6 +342,7 @@ def markdown_to_xhtml(markdown_text: str, chapter_title: str, chapter_number: in
             close_lists()
             close_blockquote()
             parts.append("<hr />")
+            i += 1
             continue
 
         if stripped.startswith(">"):
@@ -226,9 +353,28 @@ def markdown_to_xhtml(markdown_text: str, chapter_title: str, chapter_number: in
                 in_blockquote = True
             quote_text = stripped[1:].lstrip()
             parts.append(f"<p>{inline_markdown(quote_text)}</p>")
+            i += 1
             continue
 
         close_blockquote()
+
+        if "|" in line and i + 1 < len(lines) and is_table_separator(lines[i + 1]):
+            flush_paragraph()
+            close_lists()
+            table_rows: list[str] = []
+            cursor = i + 2
+            while cursor < len(lines):
+                candidate = lines[cursor]
+                if not candidate.strip():
+                    break
+                if "|" not in candidate:
+                    break
+                table_rows.append(candidate)
+                cursor += 1
+
+            parts.append(render_table(line, lines[i + 1], table_rows))
+            i = cursor
+            continue
 
         heading_match = re.match(r"^(#{1,6})\s+(.*)$", stripped)
         if heading_match:
@@ -238,9 +384,11 @@ def markdown_to_xhtml(markdown_text: str, chapter_title: str, chapter_number: in
             title = heading_match.group(2).strip()
             if level == 1 and not skipped_first_h1:
                 skipped_first_h1 = True
+                i += 1
                 continue
             anchor = slugify(title)
             parts.append(f'<h{level} id="{anchor}">{inline_markdown(title)}</h{level}>')
+            i += 1
             continue
 
         ordered_match = re.match(r"^(\d+)\.\s+(.*)$", stripped)
@@ -254,9 +402,11 @@ def markdown_to_xhtml(markdown_text: str, chapter_title: str, chapter_number: in
                 parts.append(f"<{tag}>")
                 list_stack.append(tag)
             parts.append(f"<li>{inline_markdown(content.strip())}</li>")
+            i += 1
             continue
 
         paragraph.append(line)
+        i += 1
 
     flush_paragraph()
     close_lists()
@@ -283,10 +433,18 @@ def build_epub(markdown_files: list[Path]) -> None:
     css = """
 body { font-family: serif; line-height: 1.45; margin: 5%; }
 h1, h2, h3, h4, h5, h6 { line-height: 1.2; margin-top: 1.2em; }
-pre { background: #f4f4f4; padding: 0.8em; white-space: pre-wrap; }
 code { font-family: monospace; }
-pre code { display: block; line-height: 1.5; }
-.tok-comment { color: #6a737d; }
+pre { margin: 0; white-space: pre-wrap; }
+pre code { display: block; line-height: 1.7; }
+.code-block { margin: 1.6em 0; border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; background: #fafbfc; }
+.code-block-header { padding: 1.05em 1.25em 0.35em; background: #fafbfc; }
+.code-block-language { font-family: Helvetica, Arial, sans-serif; font-size: 0.80em; font-weight: 200; color: #cccccc; letter-spacing: 0.01em; }
+.code-block pre { padding: 0.15em 1.25em 1.25em; background: transparent; }
+.code-block code { font-size: 1.02em; }
+table { width: 100%; border-collapse: collapse; margin: 1.25em 0; }
+th, td { border: 1px solid #d9dee7; padding: 0.55em 0.75em; vertical-align: top; }
+th { background: #f4f6f8; text-align: left; }
+.tok-comment { color: #0a7b34; }
 .tok-string, .tok-char { color: #0a7b34; }
 .tok-number { color: #8a3ffc; }
 .tok-keyword { color: #9a3412; font-weight: 600; }
