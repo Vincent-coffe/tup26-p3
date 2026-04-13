@@ -11,9 +11,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
-record SortField(string Name, bool Numeric, bool Descending);
-record AppConfig(string? InputFile, string? OutputFile, string Delimiter, bool NoHeader, List<SortField> SortFields);
-
 var cfg = ParseArgs(args);
 var text = ReadInput(cfg);
 var (header, rows) = ParseDelimited(text, cfg.Delimiter, cfg.NoHeader);
@@ -110,4 +107,8 @@ void WriteOutput(string text, AppConfig cfg){
 static string Unescape(string s) => s.Replace("\\t","\t").Replace("\\n","\n").Replace("\\r","\r");
 static void ExitWithError(string msg){ Console.Error.WriteLine(msg); Environment.Exit(1); }
 static void PrintHelp(){ Console.WriteLine("Uso: sortx [entrada [salida]] -b campo[:tipo[:orden]] [-d delim] [-nh] [-h]\nTipo: num para numérico. Orden: desc para descendente."); }
-}
+}""
+
+record SortField(string Name, bool Numeric, bool Descending);
+record AppConfig(string? InputFile, string? OutputFile, string Delimiter, bool NoHeader, List<SortField> SortFields);
+
