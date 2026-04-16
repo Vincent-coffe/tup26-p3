@@ -226,8 +226,14 @@ static class AlumnosManager {
             string rutaAlumno = Path.Combine(rutaBasePracticos, alumno.CarpetaNombre);
 
             if (!Directory.Exists(rutaAlumno)) {
-                Log.Error($"No existe la carpeta del alumno: {rutaAlumno}");
-                continue;
+                try {
+                    Directory.CreateDirectory(rutaAlumno);
+                    Log.Debug($" ➕ {rutaAlumno, -40}");
+                }
+                catch (Exception ex) {
+                    Log.Error($"No se pudo crear la carpeta del alumno {rutaAlumno}: {ex.Message}");
+                    continue;
+                }
             }
 
             string rutaDestino = Path.Combine(rutaAlumno, carpetaPractico);

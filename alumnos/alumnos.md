@@ -33,7 +33,7 @@ Legajo  Nombre y Apellido                Teléfono         Foto  GitHub         
 61490   Valdez Bustamante, Tomás         (381) 303-1034   No    -                        🔴⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️  ⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️
 63397   Vercellone, Tomás                (381) 676 6267   No    Xtomi2456                🟠⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️  ⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️
 63696   Yael, Ramón Ezequiel             (381) 326-4777   Si    -                        🔴⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️  ⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️
-63389   Pereyra Petroni, Nicolas         (381) 332-4401   Si    -                        🟢⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️  ⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️
+63389   Pereyra Petroni, Nicolas         (381) 332-4401   Si    nicopereyra255-ship-it   🟢⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️  ⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️
 ```
 
 ## C9

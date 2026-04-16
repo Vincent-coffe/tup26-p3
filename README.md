@@ -1,161 +1,226 @@
-# Resultados TP1: Sortx
+# TP2 — Compilador de Expresiones Aritméticas con Variable: `calculadora`
 
-### Resultados de la corrección del TP1.
+**Entrega:** 22 de ABRIL de 2026 a las 23:59hs
 
-Los trabajos que tienen errores deben corregirse y reentregarse para ser aprobados.
-Los que no han sido presentados deben ser entregados sin errores para ser aprobados.
+---
 
-> Plazo: *jueves 16 de abril de 2026 a las 22:00 hs*
+## Descripción
 
+Desarrollar una aplicación de consola llamada **`calculadora`** que permita **parsear y evaluar expresiones aritméticas enteras** con soporte para la variable **`x`**.
 
-#### Para presentar el trabajo deben:
-1. Cambiar a la rama `main`, 
-2. Bajar (`pull`) el repositorio con los datos nuevos. 
-3. Luego deben crear una rama nueva y corregir el programa (con `commit` y `push` a su rama).
-4. Realizar un `pull request` para que se pueda revisar la corrección.
-5. Volver a la rama `main` y bajar (`pull`) el repositorio para tener los datos nuevos.
+La herramienta debe poder trabajar de dos maneras:
 
+- **Modo directo**, recibiendo una expresión y un valor para `x` por línea de comandos.
+- **Modo interactivo**, permitiendo ingresar una expresión una vez y luego evaluarla varias veces con distintos valores de `x`.
 
+El objetivo del trabajo es modelar un **árbol de sintaxis abstracta (AST)** y construir un **parser de descenso recursivo** que respete precedencia de operadores, paréntesis y operadores unarios.
 
+---
 
+## Sintaxis
 
-## C7
-
-### Funciona bien
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63402 | Condori, Nahuel Ariel | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63241 | Cortez, Josías | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63776 | Fuensalida, Ulises Nahuel | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63174 | Jerez, Luciano Germán | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63399 | Lazarte, Gonzalo Romeo | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|61581 | Paz, Naim Federico | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63647 | Paz, Valentina | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63354 | Perondi, Luciano | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63546 | Sosa Paz, Jeremías | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|61490 | Valdez Bustamante, Tomás | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63397 | Vercellone, Tomás | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63456 | Ávila Lahr, Joaquín | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Funciona pero tiene errores
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63396 | Gil Garau, Atalía Trinidad | 🔵 | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-|61577 | González, Lucas Alfredo | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-|63420 | Pereyra, Valentina Nazaret | 🔵 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-|63350 | Páez Carabajal, Santiago | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-|63393 | Ritorto, Lucca | 🔵 | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-|63387 | Sosa Gonella, Luca | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-|63547 | Sosa Paz, José Lisandro | 🔵 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-
-### No compila
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63268 | Condori, Karina Edith | 🟡 | - | - | - | - | - | - |
-|63208 | Rosconi, Ignacio Federico | 🟡 | - | - | - | - | - | - |
-
-### No presentó
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63415 | Chávez, Lucas Francisco | 🔴 | - | - | - | - | - | - |
-|63419 | Coronel, Tomás | 🔴 | - | - | - | - | - | - |
-|63330 | Cuevas, Joel Alejandro | 🔴 | - | - | - | - | - | - |
-|63457 | González Dupuy, Ignacio | 🔴 | - | - | - | - | - | - |
-|63700 | Jiménez, Nelson Maximiliano | 🔴 | - | - | - | - | - | - |
-|63211 | Montero, Luca | 🔴 | - | - | - | - | - | - |
-|63447 | Suárez, Sofía Celeste | 🔴 | - | - | - | - | - | - |
-|63696 | Yael, Ramón Ezequiel | 🔴 | - | - | - | - | - | - |
-
-## C9
-
-### Funciona bien
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63385 | Almaraz Sintora, Nahuel | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63150 | Carlino, Joaquín | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63341 | Carrer, Juan Cruz | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63461 | Cativa, Facundo Simón | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63137 | Díaz, José Simón | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63345 | García, Franco Tomás | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63182 | González Rojas, Emmanuel | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|62844 | Guzmán, Luciano Leonel | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|61489 | Gómez, Tomás | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63418 | Miranda, Gonzalo Emanuel | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63207 | Saravia, César Nahum | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63216 | Sánchez, Sofía Micaela | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|61026 | Thompson, María José | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|63300 | Álvarez, Hernán Fabricio | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Funciona pero tiene errores
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63218 | Cortés, Guillermo Augusto | 🔵 | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-|63266 | Decima, Juan Cruz | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-|63737 | Galván, Rocío Julieta | 🔵 | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-|63717 | González, Octavio | 🔵 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-|63219 | Lazarte, Sergio Fabricio | 🔵 | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
-|63297 | Lezana, Juan Ignacio | 🔵 | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
-|63213 | Marina Noguera, Morena | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-|63494 | Medina, Lourdes Natalia | 🔵 | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-|63234 | Molina, Lázaro Exequiel | 🔵 | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ |
-|63412 | Morán, Facundo Martín | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-|63220 | Pérez del Rien, Valentina | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-|63313 | Ávila Puntano, Benjamín | 🔵 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-
-### No compila
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63222 | Bajre Martínez, Julián | 🟡 | - | - | - | - | - | - |
-|63231 | Herrera, Rocío Tatiana | 🟡 | - | - | - | - | - | - |
-
-### No presentó
-
-| Legajo | Nombre | R | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|---|---|
-|63217 | Altamiranda Borquez, Bian | 🔴 | - | - | - | - | - | - |
-|61801 | Benega, Maximiliano Abraham | 🔴 | - | - | - | - | - | - |
-|63493 | Busnelli, Bruno | 🔴 | - | - | - | - | - | - |
-|64016 | Cura, Rocío Aylen | 🔴 | - | - | - | - | - | - |
-|61641 | Figueroa, Nahuel Ramón | 🔴 | - | - | - | - | - | - |
-|61057 | Getar, Thomas | 🔴 | - | - | - | - | - | - |
-|61161 | González, Thomas Ezequiel | 🔴 | - | - | - | - | - | - |
-|63425 | Holmquist, Jeremy | 🔴 | - | - | - | - | - | - |
-|61907 | Kargachin, Guadalupe | 🔴 | - | - | - | - | - | - |
-|63388 | López, Leandro Joel | 🔴 | - | - | - | - | - | - |
-|63205 | Navarro Aragón, Facundo | 🔴 | - | - | - | - | - | - |
-|63232 | Roldan, Enzo Joaquín | 🔴 | - | - | - | - | - | - |
-
-### Comandos para las pruebas:
-
-1. Help
->   dotnet run sortx.cs -- --help
-
-2. Ordenar por apellido
->   dotnet run sortx.cs -- empleados.csv --by apellido
-
-3. Ordenar por salario descendente
->   dotnet run sortx.cs -- empleados.csv --by salario:num:desc
-
-4. Ordenar por departamento y salario descendente
->   dotnet run sortx.cs -- empleados.csv --by departamento --by salario:num:desc
-
-5. Salida a archivo
->   dotnet run sortx.cs -- empleados.csv --by apellido:alpha:asc --output salida.csv
-
-### Archivo de entrada (empleados.csv):
-```text
-nombre,apellido,edad,salario,departamento
-Carlos,García,35,85000,Ingeniería
-Ana,Martínez,28,72000,Diseño
-Luis,Rodríguez,42,120000,Gerencia
-María,López,31,88000,Ingeniería
-Pedro,Sánchez,25,65000,Diseño
-Laura,González,38,95000,Gerencia
+```bash
+calculadora [expresion valor] [--help] [--probar]
 ```
+
+---
+
+## Opciones
+
+| Opción larga | Corta | Descripción                  |
+| ------------ | ----- | ---------------------------- |
+| `--help`     | `-h`  | Muestra la ayuda y termina.  |
+| `--test`     | `-t`  | Ejecuta pruebas automáticas. |
+
+### Argumentos posicionales
+
+| Argumento   | Descripción                                                                           |
+| ----------- | ------------------------------------------------------------------------------------- |
+| `expresion` | Fórmula a evaluar. Incluir números enteros, operadores, paréntesis y la variable `x`. |
+| `valor`     | Valor entero con el que se reemplaza la variable `x` al evaluar la expresión.         |
+
+---
+
+## Expresiones soportadas
+
+La calculadora debe aceptar expresiones formadas por:
+
+- **Números enteros**: `0`, `15`, `123`
+- **Variable**: `x` o `X`
+- **Operadores binarios**:
+  - `+` suma
+  - `-` resta
+  - `*` multiplicación
+  - `/` división entera
+- **Operadores unarios**:
+  - `+` positivo
+  - `-` negación
+- **Paréntesis**: `(` y `)`
+
+### Precedencia
+
+El parser debe respetar el siguiente orden de precedencia:
+
+1. Paréntesis `(` y `)`
+2. Operadores unarios `+` y `-`
+3. Multiplicación y división `*` y `/`
+4. Suma y resta `+` y `-`
+
+---
+
+## Comportamiento esperado
+
+### Modo directo
+
+Si se invoca con dos argumentos posicionales:
+
+```bash
+calculadora "(x - 1) * 2" 10
+```
+
+el programa debe:
+
+1. Parsear la expresión.
+2. Reemplazar `x` por el valor indicado.
+3. Evaluar el AST resultante.
+4. Mostrar el resultado por `stdout`.
+
+### Modo interactivo
+
+Si se ejecuta sin argumentos, el programa debe:
+
+1. Pedir una expresión matemática con la variable `x`.
+2. Compilar esa expresión una sola vez.
+3. Pedir sucesivamente valores para `x`.
+4. Mostrar el resultado de cada evaluación.
+5. Finalizar cuando el usuario ingrese `fin` o una entrada vacía.
+
+### Ayuda
+
+Si se invoca con `--help`, `-h` debe mostrar una ayuda breve y terminar con código de salida `0`.
+
+### Pruebas
+
+Si se invoca con `--test`, `-p` o `-t`, debe ejecutar un conjunto de pruebas automáticas y reportar si pasaron correctamente.
+
+### Errores
+
+Ante expresiones inválidas, el programa debe informar el error con un mensaje claro. Algunos casos esperables:
+
+- Token inesperado
+- Paréntesis sin cerrar
+- Entrada vacía
+- División por cero
+- Valor de `x` inválido
+
+---
+
+## Ejemplos de uso
+
+```bash
+# Evaluación directa
+calculadora "1 + 2 * 3" 0
+# Salida: 7
+
+# Uso de la variable x
+calculadora "1 + 2 * x" 10
+# Salida: 21
+
+# Paréntesis y precedencia
+calculadora "(x - 1) * (x - 8 / 4) + 3" 5
+# Salida: 15
+
+# Modo interactivo
+calculadora
+
+# Ayuda
+calculadora --help
+
+# Ejecutar pruebas
+calculadora --probar
+```
+
+---
+
+## Diseño requerido
+
+El programa debe separar claramente las siguientes responsabilidades:
+
+```text
+1. Procesar comandos      → interpretar args y decidir el modo de ejecución
+2. Parsear expresión      → convertir texto en un AST
+3. Representar nodos      → modelar números, variable, unarios y binarios
+4. Evaluar AST            → calcular el resultado para un valor de x
+5. Ejecutar pruebas       → verificar precedencia y evaluación
+```
+
+### Modelo de nodos
+
+Se espera un árbol abstracto de tipos (AST) similar al siguiente:
+
+```csharp
+abstract class Nodo {
+    public abstract int Evaluar(int x);
+}
+
+class NumeroNodo : Nodo;
+class VariableNodo : Nodo;
+class NegativoNodo : Nodo;
+
+abstract class NodoBinario : Nodo;
+class SumaNodo : NodoBinario;
+class RestaNodo : NodoBinario;
+class MultiplicacionNodo : NodoBinario;
+class DivisionNodo : NodoBinario;
+```
+
+### Parser
+
+El parser debe implementarse mediante **descenso recursivo (DRP)**, con una estructura equivalente a:
+
+```text
+Expresion := Termino { ('+' | '-') Termino }
+Termino   := Factor  { ('*' | '/') Factor }
+Factor    := '+' Factor
+          | '-' Factor
+          | '(' Expresion ')'
+          | numero
+          | x
+```
+
+### Organización sugerida
+
+La solución puede dividirse en archivos similares a:
+
+- `Programa.cs` para el punto de entrada y el modo interactivo
+- `Compilador.cs` para el parser
+- `Nodos.cs` para la jerarquía del AST
+- `Comandos.cs` para el procesamiento de argumentos
+- `Pruebas.cs` para las pruebas automáticas
+
+---
+
+## Casos de prueba mínimos
+
+| Comando                                        | Resultado esperado                    |
+| ---------------------------------------------- | ------------------------------------- |
+| `calculadora "1 + 2 * 3" 0`                    | `7`                                   |
+| `calculadora "1 + 2 * x" 10`                   | `21`                                  |
+| `calculadora "(x - 1) * (x - 8 / 4) + 3" 10`   | `75`                                  |
+| `calculadora "-(3 + 2)" 0`                     | `-5`                                  |
+| `calculadora "10 / 2" 0`                       | `5`                                   |
+| `calculadora --help`                           | Muestra ayuda y termina con código 0  |
+| `calculadora --test`                           | Ejecuta pruebas automáticas           |
+| `calculadora "(1 + 2" 0`                       | Error de parsing                      |
+
+---
+
+## Entrega
+
+- Proyecto completo en la carpeta `enunciados/tp2`.
+
+> [!NOTE]
+> A pesar de que en el enunciado se muestra `calculadora --help`
+> durante el desarroll se recomienda ejecutar el proyecto directamente con `dotnet run`
+> desde la carpeta del proyecto, pasando los argumentos después de `tp2`:
+> `dotnet run -- --help` o `dotnet run -- "(x - 1) * 2" 10`. Esto facilita la depuración y el desarrollo iterativo.
