@@ -4,34 +4,6 @@ Esta serie de clases muestra cómo una misma idea —un **conjunto** de elemento
 
 ---
 
-## Paso 0 — `Conjunto` con `List<int>` (punto de partida)
-
-**Archivo:** `13.0-genericos.cs`
-
-La primera versión es la más directa: un `Conjunto` que almacena enteros usando una `List<int>` internamente.
-
-```csharp
-class Conjunto {
-    List<int> elementos;
-
-    public void Agregar(int valor) {
-        if (!elementos.Contains(valor)) elementos.Add(valor);
-    }
-
-    public bool Contiene(int valor) => elementos.Contains(valor);
-
-    // Indexador: a[5] = true agrega, a[5] = false elimina
-    public bool this[int key] {
-        get => Contiene(key);
-        set { if (value) Agregar(key); else Eliminar(key); }
-    }
-}
-```
-
-**Problema:** La clase solo sirve para `int`. Si se quiere un conjunto de `string` o de `Alumno`, hay que copiar y pegar toda la clase cambiando el tipo.
-
----
-
 ## Paso 1 — `Conjunto` con array propio (implementación manual)
 
 **Archivo:** `13.1-genericos-conjunto-array.cs`
