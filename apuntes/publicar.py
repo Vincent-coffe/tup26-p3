@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import fnmatch
 import html
 import subprocess
 import re
@@ -21,7 +22,11 @@ BOOK_LANGUAGE   = "es"
 BOOK_SUBTITLE   = "C#, .NET y herramientas de desarrollo"
 BOOK_AUTHOR     = "Alejandro Di Battista"
 BOOK_COVER      = WORKDIR / "portada.jpg"
-EXCLUDED        = {"00.010-Programa-de-programacion-iii.md"}
+EXCLUDED        = ["00.*.md", "05.*.md", "README.md", "CONTRIBUTING.md", "LICENSE.md"]
+
+
+def is_excluded(path: Path) -> bool:
+    return any(fnmatch.fnmatch(path.name, pattern) for pattern in EXCLUDED)
 
 
 def slugify(text: str) -> str:
@@ -549,10 +554,7 @@ hr { border: none; border-top: 1px solid #bbb; margin: 1.5em 0; }
             epub.writestr(f"OEBPS/{filename}", xhtml)
 
 def markdown_raiz(root: Path) -> list[Path]:
-    return sorted(
-        path for path in root.iterdir()
-        if path.is_file() and path.suffix.lower() == ".md"
-    )
+    return sorted( path for path in root.iterdir() if path.is_file() and path.suffix.lower() == ".md" )
 
 def renumerar(root: Path) -> None:
     PATTERN = re.compile(r"^(?P<seccion>\d{2,})\.(?P<orden>\d{2,})-(?P<nombre>.+)\.md$")
@@ -572,23 +574,38 @@ def renumerar(root: Path) -> None:
         siguiente_orden += 10
         destino = f"{actual:02d}.{siguiente_orden:03d}-{nombre.capitalize()}.md"
 
-        print(f"{origen.name:60} -> {destino:60}")
+        if origen.name == destino:
+            continue
+
+        print(f"     de: {origen.name:60}\n      a: {destino:60}\n")
         origen.rename(origen.parent / destino)
 
 def main() -> int:
+    print("\n\nIniciando proceso de publicacion...\n")
+    print("- Paso 1: Renumerar archivos Markdown en raiz...")
     renumerar(WORKDIR)
-    markdown_files = [path for path in markdown_raiz(WORKDIR) if path.name not in EXCLUDED]
+    markdown_files = [path for path in markdown_raiz(WORKDIR) if not is_excluded(path)]
     if not markdown_files:
         print("No se encontraron archivos Markdown para incluir.", file=sys.stderr)
         return 1
+
     if not BOOK_COVER.exists():
         print(f"No se encontro la portada: {BOOK_COVER.name}", file=sys.stderr)
         return 1
 
+    print("- Paso 2: Construir el archivo EPUB...")
     build_epub(markdown_files)
-    print(OUTPUT.name)
+    print(f"     Salida: {OUTPUT.name}\n")
 
-    subprocess.run(["open", "-a", "Books", str(OUTPUT)], check=False)
+    print("- Paso 3: Abrir el libro en Apple Books...")
+    subprocess.run(["osascript", "-e", 'tell application "Books" to quit'], check=False)
+    subprocess.Popen(
+        ["open", "-a", "Books", str(OUTPUT)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    print("\nProceso de publicacion completado.\n\n")
     return 0
 
 

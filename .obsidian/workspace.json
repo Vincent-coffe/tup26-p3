@@ -11,14 +11,10 @@
             "id": "94123b98dab7b572",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "apuntes/04.010-Tutorial-crear-cli.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "04.010-Tutorial-crear-cli"
+              "title": "Nueva pestaña"
             }
           }
         ]
@@ -94,7 +90,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "apuntes/04.010-Tutorial-crear-cli.md",
+                "file": "apuntes/04.090-Crud-efcore-sqlite-3.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +100,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Enlaces entrantes de 04.010-Tutorial-crear-cli"
+              "title": "Enlaces entrantes de 04.090-Crud-efcore-sqlite-3"
             }
           },
           {
@@ -113,12 +109,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "apuntes/04.010-Tutorial-crear-cli.md",
+                "file": "apuntes/04.090-Crud-efcore-sqlite-3.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Enlaces salientes de 04.010-Tutorial-crear-cli"
+              "title": "Enlaces salientes de 04.090-Crud-efcore-sqlite-3"
             }
           },
           {
@@ -156,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "apuntes/04.010-Tutorial-crear-cli.md",
+                "file": "apuntes/04.090-Crud-efcore-sqlite-3.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Esquema de 04.010-Tutorial-crear-cli"
+              "title": "Esquema de 04.090-Crud-efcore-sqlite-3"
             }
           }
         ]
@@ -185,41 +181,41 @@
   },
   "active": "94123b98dab7b572",
   "lastOpenFiles": [
-    "apuntes/04.120-Motor-planilla.md",
-    "apuntes/04.110-Tutorial-razor-aspnet.md",
-    "apuntes/04.100-Tutorial-agente-shell-csharp.md",
     "apuntes/04.090-Crud-efcore-sqlite-3.md",
-    "apuntes/04.080-Entity-framework-core.md",
-    "apuntes/04.070-Tutorial-efcore-sqlite.md",
-    "apuntes/04.060-Tutorial-evaluar-expresion.md",
-    "apuntes/04.050-Tutorial-evaluador-expresiones-csharp.md",
-    "apuntes/04.040-Tutorial-modelar-numero-con-clases.md",
-    "apuntes/04.030-Tutorial-entero-grande.md",
-    "apuntes/04.020-Tutorial-crear-tui.md",
-    "apuntes/03.020-Entrada-y-salida-por-consola-con-system-console.md",
-    "apuntes/02.140-Linq.md",
-    "apuntes/02.130-Solid-en-librerias-dotnet.md",
-    "apuntes/02.120-Principios-solid.md",
-    "apuntes/02.110-Switch-expression-y-pattern-matching.md",
-    "apuntes/02.100-Control-de-flujo-y-manejo-de-excepciones.md",
-    "apuntes/02.090-Funciones-delegados-y-eventos.md",
+    "apuntes/05.030-Motor-planilla.md",
+    "apuntes/05.020-Tutorial-modelar-numero-con-clases.md",
+    "apuntes/05.010-Tutorial-entero-grande.md",
+    "apuntes/04.090-Tutorial-razor-aspnet.md",
+    "apuntes/04.080-Tutorial-agente-shell-csharp.md",
+    "apuntes/04.070-Crud-efcore-sqlite-3.md",
+    "apuntes/04.060-Tutorial-entity-framework-core.md",
+    "apuntes/04.050-Tutorial-efcore-sqlite.md",
+    "apuntes/04.040-Tutorial-evaluar-expresion.md",
+    "apuntes/04.030-Tutorial-evaluador-expresiones-csharp.md",
+    "apuntes/05.040-Tutorial-modelar-numero-con-clases.md",
+    "apuntes/05.120-Motor-planilla.md",
+    "apuntes/05.030-Tutorial-entero-grande.md",
     "apuntes/02.080-Interfaces-y-contratos.md",
-    "apuntes/02.070-Null-y-tipos-anulables.md",
-    "apuntes/02.060-Clases-y-objetos.md",
-    "apuntes/02.050-Tipos-compuestos.md",
-    "apuntes/02.040-Strings.md",
-    "apuntes/02.030-Enumeraciones.md",
-    "apuntes/02.020-Tipos-basicos.md",
-    "apuntes/01.030-Git-y-github-control-de-versiones-y-colaboracion.md",
+    "apuntes/01.010-Fundamentos-del-ecosistema-dotnet.md",
+    "apuntes/02.085-Interfaces-y-contratos.md",
+    "apuntes/01.015-Fundamentos-del-ecosistema-dotnet.md",
+    "apuntes/02.150-Entrada-y-salida-por-consola-con-system-console.md",
+    "apuntes/02.155-Entrada-y-salida-por-consola-con-system-console.md",
+    "experimentos/gestion-stock.md",
+    "apuntes/02.160-Archivos-de-texto-rutas-y-encoding.md",
+    "apuntes/02.140-Linq.md",
+    "apuntes/02.120-Principios-solid.md",
+    "apuntes/02.130-Solid-en-librerias-dotnet.md",
+    "apuntes/04.010-Tutorial-crear-cli.md",
+    "02.120-Principios-solid.pdf",
+    "apuntes/__pycache__/publicar.cpython-314.pyc",
+    "apuntes/renumerar_md.py",
     "apuntes/publicar.py",
     "apuntes/crear_apuntes.py",
     "experimentos/2048-CC.html",
     "2048-CC.html",
     "practicos/63387 - Sosa Gonella, Luca/TP1/salida.csv",
     "practicos/63387 - Sosa Gonella, Luca/TP1/datos.tsv",
-    "practicos/63350 - Páez Carabajal, Santiago/TP1/salida.csv",
-    "practicos/63297 - Lezana, Juan Ignacio/TP1/sortx/sortx.cs",
-    "practicos/63297 - Lezana, Juan Ignacio/TP1/sortx/empleados.csv",
-    "practicos/63297 - Lezana, Juan Ignacio/TP1/sortx"
+    "practicos/63350 - Páez Carabajal, Santiago/TP1/salida.csv"
   ]
 }
