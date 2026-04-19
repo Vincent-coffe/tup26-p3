@@ -1,5 +1,4 @@
-//  PUNTO DE ENTRADA 
-
+// PUNTO DE ENTRADA
 try
 {
     Console.WriteLine("Paso 1: ParseArgs");
@@ -24,8 +23,6 @@ catch (Exception ex)
 {
     Console.Error.WriteLine($"ERROR: {ex.Message}");
 }
-
-// parseo de argumentos y configuración
 
 AppConfig ParseArgs(string[] args)
 {
@@ -57,7 +54,8 @@ AppConfig ParseArgs(string[] args)
 
             case "-d":
             case "--delimiter":
-                delimiter = args[++i] == "\\t" ? "\t" : args[i];
+                var value = args[++i];
+                delimiter = value == "\\t" ? "\t" : value;
                 i++;
                 break;
 
@@ -82,14 +80,18 @@ AppConfig ParseArgs(string[] args)
             default:
                 if (arg.StartsWith("-"))
                     throw new Exception($"Opción inválida: {arg}");
+
                 positional.Add(arg);
                 i++;
                 break;
         }
     }
 
-    if (positional.Count > 0 && input == null) input = positional[0];
-    if (positional.Count > 1 && output == null) output = positional[1];
+    if (positional.Count > 0 && input == null)
+        input = positional[0];
+
+    if (positional.Count > 1 && output == null)
+        output = positional[1];
 
     if (fields.Count == 0)
         throw new Exception("Debes usar -b");
@@ -102,18 +104,27 @@ SortField ParseSortField(string text)
     var parts = text.Split(':');
 
     string name = parts[0];
-    bool numeric = parts.Length > 1 && parts[1] == "num";
-    bool desc = parts.Length > 2 && parts[2] == "desc";
+    bool numeric = false;
+    bool desc = false;
+
+    if (parts.Length > 1)
+    {
+        if (parts[1] == "num") numeric = true;
+        else if (parts[1] == "alpha") numeric = false;
+    }
+
+    if (parts.Length > 2)
+    {
+        if (parts[2] == "desc") desc = true;
+        else if (parts[2] == "asc") desc = false;
+    }
 
     return new SortField(name, numeric, desc);
 }
 
- // lectura del archivo de entrada
-
 string ReadInput(string? file)
 {
-    if (file == null)
-        return Console.In.ReadToEnd();
+    if (file == null) return Console.In.ReadToEnd();
 
     if (!File.Exists(file))
         throw new Exception("Archivo no encontrado");
@@ -121,45 +132,56 @@ string ReadInput(string? file)
     return File.ReadAllText(file);
 }
 
-//  PASO 3 
-
 (List<string> headers, List<string[]> rows) ParseDelimited(string text, AppConfig config)
 {
-    var lines = text.Split('\n')
-                    .Where(l => l.Trim() != "")
-                    .ToList();
+    var lines = text
+        .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+        .Where(l => l.Trim() != "")
+        .ToList();
 
     List<string> headers;
     int start = 0;
 
     if (!config.NoHeader)
     {
-        headers = lines[0].Split(config.Delimiter).Select(x => x.Trim()).ToList();
+        headers = lines[0]
+            .Split(config.Delimiter)
+            .Select(x => x.Trim())
+            .ToList();
+
         start = 1;
     }
     else
     {
         int cols = lines[0].Split(config.Delimiter).Length;
-        headers = Enumerable.Range(0, cols).Select(x => x.ToString()).ToList();
+        headers = Enumerable.Range(0, cols)
+            .Select(x => x.ToString())
+            .ToList();
     }
 
     var rows = new List<string[]>();
 
     for (int i = start; i < lines.Count; i++)
-        rows.Add(lines[i].Split(config.Delimiter));
+    {
+        rows.Add(lines[i]
+            .Split(config.Delimiter)
+            .Select(x => x.Trim())
+            .ToArray());
+    }
 
     return (headers, rows);
 }
-
-//  PASO 4 ordenamiento de filas
 
 List<string[]> SortRows(List<string[]> rows, List<string> headers, AppConfig config)
 {
     int GetIndex(string name)
     {
-        int idx = headers.IndexOf(name);
+        int idx = headers.FindIndex(h =>
+            h.Equals(name, StringComparison.OrdinalIgnoreCase));
+
         if (idx == -1)
             throw new Exception($"Columna no encontrada: {name}");
+
         return idx;
     }
 
@@ -172,8 +194,18 @@ List<string[]> SortRows(List<string[]> rows, List<string> headers, AppConfig con
         if (field.Numeric)
         {
             result = field.Descending
-                ? result.OrderByDescending(r => double.TryParse(r[index], out var n) ? n : 0).ToList()
-                : result.OrderBy(r => double.TryParse(r[index], out var n) ? n : 0).ToList();
+                ? result.OrderByDescending(r =>
+                    double.TryParse(r[index],
+                        System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        out var n) ? n : 0)
+                    .ToList()
+                : result.OrderBy(r =>
+                    double.TryParse(r[index],
+                        System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        out var n) ? n : 0)
+                    .ToList();
         }
         else
         {
@@ -185,8 +217,6 @@ List<string[]> SortRows(List<string[]> rows, List<string> headers, AppConfig con
 
     return result;
 }
-
-//  PASO 5 serialización de datos
 
 string Serialize(List<string> headers, List<string[]> rows, AppConfig config)
 {
@@ -201,8 +231,6 @@ string Serialize(List<string> headers, List<string[]> rows, AppConfig config)
     return result;
 }
 
-//  PASO 6 salida a archivo o consola
-
 void WriteOutput(string? file, string content)
 {
     if (file == null)
@@ -211,14 +239,10 @@ void WriteOutput(string? file, string content)
         File.WriteAllText(file, content);
 }
 
-//  HELP 
-
 void PrintHelp()
 {
-    Console.WriteLine("Uso: sortx [input] -b campo[:tipo[:orden]]");
+    Console.WriteLine("Uso: sortx [input] --by campo[:tipo[:orden]] [--output archivo]");
 }
-
-//  MODELOS 
 
 record SortField(string Name, bool Numeric, bool Descending);
 

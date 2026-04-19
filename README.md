@@ -20,7 +20,7 @@ El objetivo del trabajo es modelar un **árbol de sintaxis abstracta (AST)** y c
 ## Sintaxis
 
 ```bash
-calculadora [expresion valor] [--help] [--probar]
+calculadora [expresion valor] [--help] [--test]
 ```
 
 ---
@@ -137,7 +137,7 @@ calculadora
 calculadora --help
 
 # Ejecutar pruebas
-calculadora --probar
+calculadora --test
 ```
 
 ---
