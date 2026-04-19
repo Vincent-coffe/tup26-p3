@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "apuntes/02.220-principios-solid-csharp.md",
+                "file": "apuntes/04.010-Tutorial-crear-cli.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "02.220-principios-solid-csharp"
+              "title": "04.010-Tutorial-crear-cli"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "apuntes/02.220-principios-solid-csharp.md",
+                "file": "apuntes/04.010-Tutorial-crear-cli.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Enlaces entrantes de 02.220-principios-solid-csharp"
+              "title": "Enlaces entrantes de 04.010-Tutorial-crear-cli"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "apuntes/02.220-principios-solid-csharp.md",
+                "file": "apuntes/04.010-Tutorial-crear-cli.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Enlaces salientes de 02.220-principios-solid-csharp"
+              "title": "Enlaces salientes de 04.010-Tutorial-crear-cli"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "apuntes/02.220-principios-solid-csharp.md",
+                "file": "apuntes/04.010-Tutorial-crear-cli.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Esquema de 02.220-principios-solid-csharp"
+              "title": "Esquema de 04.010-Tutorial-crear-cli"
             }
           }
         ]
@@ -185,32 +185,35 @@
   },
   "active": "94123b98dab7b572",
   "lastOpenFiles": [
-    "apuntes/04.130-tutorial-razor-aspnet.md",
-    "apuntes/04.120-motor-planilla.md",
-    "apuntes/04.110-tutorial-agente-shell-csharp.md",
-    "apuntes/02.260-tutorial-linq-basado-en-video-art-of-engineer.md",
-    "apuntes/presentacion/02.250-linq.md",
-    "apuntes/02.240-linq.md",
-    "apuntes/presentacion/02.230-switch-expression-y-pattern-matching.md",
-    "apuntes/presentacion/02.190-funciones-delegados-y-eventos.md",
-    "apuntes/04.120-tutorial-agente-shell-csharp.md",
-    "apuntes/04.200-tutorial-razor-aspnet.md",
-    "apuntes/linq-presentacion.md",
-    "apuntes/en-este-repo-creame-un-proyecto-c-de-consola-llamado.md",
-    "apuntes/Claude.pdf",
-    "apuntes/04.130-motor-planilla.md",
-    "apuntes/02.220-principios-solid-csharp.md",
-    "apuntes/02.180-control-de-flujo-y-manejo-de-excepciones.md",
-    "apuntes/02.170-funciones-delegados-y-eventos.md",
-    "apuntes/02.150-interfaces-y-contratos.md",
-    "apuntes/02.130-null-y-tipos-anulables.md",
-    "apuntes/02.110-clases-y-objetos.md",
-    "apuntes/02.090-tipos-compuestos.md",
-    "apuntes/02.070-strings.md",
-    "apuntes/02.050-enumeraciones.md",
-    "apuntes/02.030-tipos-basicos.md",
-    "apuntes/02.010-variables-memoria.md",
-    "apuntes/01.030-git-y-github-control-de-versiones-y-colaboracion.md",
-    "apuntes/01.020-terminal-y-bash-para-desarrollo.md"
+    "apuntes/04.270-Motor-planilla.md",
+    "apuntes/04.220-Tutorial-razor-aspnet.md",
+    "apuntes/04.200-Tutorial-agente-shell-csharp.md",
+    "apuntes/04.190-Crud-efcore-sqlite-3.md",
+    "apuntes/04.180-Entity-framework-core.md",
+    "apuntes/04.170-Tutorial-efcore-sqlite.md",
+    "apuntes/04.150-Tutorial-evaluar-expresion.md",
+    "apuntes/04.140-Tutorial-evaluador-expresiones-csharp.md",
+    "apuntes/04.130-Tutorial-modelar-numero-con-clases.md",
+    "apuntes/04.120-Tutorial-entero-grande.md",
+    "apuntes/04.110-Tutorial-crear-tui.md",
+    "apuntes/03.110-Entrada-y-salida-por-consola-con-system-console.md",
+    "apuntes/02.220-Linq.md",
+    "apuntes/02.215-Solid-en-librerias-dotnet.md",
+    "apuntes/02.210-Principios-solid.md",
+    "apuntes/02.200-Switch-expression-y-pattern-matching.md",
+    "apuntes/02.190-Control-de-flujo-y-manejo-de-excepciones.md",
+    "apuntes/02.180-Funciones-delegados-y-eventos.md",
+    "apuntes/02.170-Interfaces-y-contratos.md",
+    "apuntes/02.160-Null-y-tipos-anulables.md",
+    "apuntes/02.150-Clases-y-objetos.md",
+    "apuntes/02.140-Tipos-compuestos.md",
+    "apuntes/02.130-Strings.md",
+    "apuntes/02.120-Enumeraciones.md",
+    "apuntes/02.110-Tipos-basicos.md",
+    "apuntes/01.120-Git-y-github-control-de-versiones-y-colaboracion.md",
+    "apuntes/apuntes-TUP26-P3.epub",
+    "apuntes/__pycache__/renumerar_md.cpython-314.pyc",
+    "apuntes/__pycache__",
+    "apuntes/Claude.pdf"
   ]
 }

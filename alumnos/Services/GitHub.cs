@@ -1,3 +1,6 @@
+using System.Data.SqlTypes;
+using System.IO.Enumeration;
+
 namespace Tup26.AlumnosApp;
 
 class GitHub {
@@ -160,6 +163,46 @@ class GitHub {
         return (partes[0].ToLower(), partes[1].ToLower() == "true");
     }
 
+
+    public List<string> ListarArchivos(int numeroPR) {
+        string? salida = Ejecutar( $"Error al listar archivos del PR #{numeroPR}",
+            $"/pulls/{numeroPR}/files", "--paginate", "--jq", @".[] | .filename" );
+
+        if (salida is null) { return new(); }
+
+        return Lineas(salida);
+    }
+
+    public void BajarArchivo(int numeroPR, string patron, string rutaDestino) {
+        string? salida = Ejecutar( $"Error al bajar archivos del PR #{numeroPR}",
+            $"/pulls/{numeroPR}/files", "--paginate", "--jq", ".[] | \"\\(.filename)\\t\\(.raw_url)\"" );
+
+        if (salida is null) { return; }
+
+        List<string> urls = Lineas(salida, pasarAMinusculas: false);
+
+        foreach (string linea in urls) {
+            try {
+                string[] partes = linea.Split('\t', 2);
+                if (partes.Length != 2) { continue; }
+
+                string nombreRemoto = partes[0];
+                string url = partes[1];
+
+                if (!FileSystemName.MatchesSimpleExpression(patron, nombreRemoto, ignoreCase: true)) { continue; }
+
+                using HttpClient client = new();
+                string nombreArchivo = Path.GetFileName(nombreRemoto);
+                string rutaArchivo   = Path.Combine(rutaDestino, nombreArchivo);
+
+                // byte[] contenido = client.GetByteArrayAsync(url).Result;
+                // File.WriteAllBytes(rutaArchivo, contenido);
+                Log.Warning($"Archivo '{nombreRemoto}'\n       > {rutaArchivo} ");
+            } catch (Exception ex) {
+                Log.Error($"Error al descargar el archivo desde '{linea}': {ex.Message}");
+            }
+        }
+    }
 
     public bool Merge(int numeroPR) {
         var detalle = ObtenerEstado(numeroPR);

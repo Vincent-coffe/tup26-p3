@@ -13,14 +13,14 @@ from xml.sax.saxutils import escape
 
 
 ROOT = Path(__file__).resolve().parent
-OUTPUT = ROOT / "apuntes-programacion-iii.epub"
-BOOK_ID = "apuntes-programacion-iii"
-BOOK_TITLE = "Apuntes de Programacion III"
-BOOK_LANGUAGE = "es"
-BOOK_SUBTITLE = "C#, .NET y herramientas de desarrollo"
-BOOK_AUTHOR = "Adrián Di Battista"
-BOOK_COVER = ROOT / "portada.jpg"
-EXCLUDED = {"00.010-programa-de-programacion-iii.md"}
+OUTPUT = ROOT / "apuntes-TUP26-P3.epub"
+BOOK_ID         = "Apuntes-TUP26-P3"
+BOOK_TITLE      = "Apuntes de Programacion III"
+BOOK_LANGUAGE   = "es"
+BOOK_SUBTITLE   = "C#, .NET y herramientas de desarrollo"
+BOOK_AUTHOR     = "Alejandro Di Battista"
+BOOK_COVER      = ROOT / "portada.jpg"
+EXCLUDED        = {"00.010-Programa-de-programacion-iii.md"}
 
 
 def slugify(text: str) -> str:
@@ -547,13 +547,30 @@ hr { border: none; border-top: 1px solid #bbb; margin: 1.5em 0; }
         for filename, _, xhtml in chapters:
             epub.writestr(f"OEBPS/{filename}", xhtml)
 
+def renumerar(root: Path) -> list[str]:
+    PATTERN = re.compile(r"^(?P<seccion>\d{2,})\.(?P<orden>\d{2,})-(?P<nombre>.+)\.md$")
+    lista = []
+    for path in root.glob("./*.md"):
+        if m := PATTERN.match(path.name):
+            lista.append((int(m.group("seccion")), int(m.group("orden")), m.group("nombre"), path))
+
+    lista.sort(key=lambda item: (item[0], item[1], item[3].name.lower()))
+
+    actual = 0
+    orden = 0
+    for (seccion, orden, nombre, origen) in lista:
+        if seccion != actual:
+            actual = seccion
+            orden = 0
+        orden += 10
+        destino = f"{actual:02d}.{orden:03d}-{nombre.capitalize()}.md"
+
+        print(f"{origen.name:60} -> {destino:60}")
+        origen.rename(origen.parent / destino)
 
 def main() -> int:
-    markdown_files = sorted(
-        path
-        for path in ROOT.glob("*.md")
-        if path.name not in EXCLUDED
-    )
+    renumerar(ROOT)    
+    markdown_files = sorted( path for path in ROOT.glob("*.md") if path.name not in EXCLUDED )
     if not markdown_files:
         print("No se encontraron archivos Markdown para incluir.", file=sys.stderr)
         return 1
