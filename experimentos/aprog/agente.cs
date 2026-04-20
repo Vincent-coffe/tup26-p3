@@ -1,26 +1,30 @@
+#!/usr/bin/env -S dotnet run
 // NanoProg.cs
 // C# 14 file-based app
+// Run: dotnet run /Users/adibattista/Documents/GitHub/tup26-p3/experimentos/agente.cs
 #:package DiffPlex@1.9.0
 #:package Microsoft.Agents.AI@1.1.0
 #:package Microsoft.Agents.AI.OpenAI@1.1.0
-#:package Microsoft.Extensions.AI@10.5.0
-#:package OpenAI@2.10.0
+#:package Microsoft.Extensions.AI@10.4.0
+#:package OpenAI@2.9.1
+
+#pragma warning disable OPENAI001
 
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
-using DiffPlex.DiffBuilder;
-using DiffPlex.DiffBuilder.Model;
+// using DiffPlex.DiffBuilder;
+// using DiffPlex.DiffBuilder.Model;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
-using OpenAI;
+using OpenAI.Responses;
 
-var workspace = new DirectoryInfo(AppContext.BaseDirectory);
-var promptFile = Path.Combine(workspace.FullName, "nanop_prompt.txt");
+var workspace = new DirectoryInfo("./");
+var promptFile = "./AGENTS.md";
 
 var baseRules = $$"""
     Reglas operativas:
-    - Trabajás en {{workspace.FullName}}.
+    - Trabajás en {{workspace.FullName}} pero el codigo por defecto ponelo dentro del subdirectorio /ejemplos.
     - Para leer o explorar, usá exec_shell (ls, cat, grep, find) o read_file.
     - Para crear, modificar o borrar archivos, usá apply_patch con un diff unificado.
     - Nunca edites archivos con comandos de shell (heredocs, sed, echo >).
@@ -35,18 +39,26 @@ var instructions = File.Exists(promptFile)
 
 var tools = new FileSystemTools(workspace);
 
-AIAgent agent = new OpenAIClient(Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
-    .GetChatClient("gpt-5.4")
-    .CreateAIAgent(
-        instructions: instructions,
-        name: "NanoProg",
-        tools: [
-            AIFunctionFactory.Create(tools.ExecShell),
-            AIFunctionFactory.Create(tools.ReadFile),
-            AIFunctionFactory.Create(tools.ApplyPatch),
-        ]);
+var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+if (string.IsNullOrWhiteSpace(apiKey)) {
+    Console.Error.WriteLine("Falta OPENAI_API_KEY.");
+    return;
+}
 
-AgentThread thread = agent.GetNewThread();
+var responsesClient = new ResponsesClient(apiKey);
+
+AIAgent agent = responsesClient.AsAIAgent(
+    "gpt-5.4-mini",
+    instructions,
+    "NanoProg",
+    "Agente de consola para programación asistida.",
+    [
+        AIFunctionFactory.Create(tools.ExecShell),
+        AIFunctionFactory.Create(tools.ReadFile),
+        AIFunctionFactory.Create(tools.ApplyPatch),
+    ]);
+
+var session = await agent.CreateSessionAsync();
 
 while (true)
 {
@@ -55,7 +67,7 @@ while (true)
     if (string.IsNullOrEmpty(input)) continue;
     if (input is "salir" or "exit" or "quit") break;
 
-    var response = await agent.RunAsync(input, thread);
+    var response = await agent.RunAsync(new ChatMessage(ChatRole.User, input), session);
     Console.WriteLine($"\nAgente> {response.Text}\n");
 }
 
@@ -64,10 +76,10 @@ sealed class FileSystemTools(DirectoryInfo workspace)
 {
     [Description("Ejecuta uno o varios comandos de shell en el workspace y devuelve stdout, stderr y exit code.")]
     public string ExecShell(
-        [Description("Comandos de shell a ejecutar en secuencia.")] string[] commands)
+        [Description("Comandos de shell a ejecutar en secuencia, separados por saltos de linea.")] string commands)
     {
         var sb = new StringBuilder();
-        foreach (var cmd in commands)
+        foreach (var cmd in commands.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             var psi = new ProcessStartInfo
             {

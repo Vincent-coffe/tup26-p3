@@ -4,7 +4,7 @@
 static class Program {
     public static void Main() {
         var a1 = new Alumno("Ana", 20);
-        var a2 = new Alumno("Anita", 20);
+        var a2 = new Alumno("Ani", 20);
         var b1 = new Alumno("Bob", 22);
 
         var clase = new Conjunto<Alumno>();
@@ -15,9 +15,9 @@ static class Program {
         Console.Clear();
         Console.WriteLine("== Conjunto<Alumno> ==");
         Console.WriteLine($" Hay {clase.Count} elementos."); // 2
-        Console.WriteLine($" - Contiene  Anita?: {clase.Contiene(a2)}");  // True
+        Console.WriteLine($" - Contiene  Ani?: {clase.Contiene(a2)}");  // True
         Console.WriteLine($" - Contiene  Bob?: {clase.Contiene(b1)}");  // True
-        Console.WriteLine($" - Contiene  Carlos?: {clase.Contiene(new Alumno("Carlos", 25))}");  // False
+        Console.WriteLine($" - Contiene  Car?: {clase.Contiene(new Alumno("Car", 25))}");  // False
         Console.WriteLine($" Conjunto<Alumno>: {clase}"); // { Ana (20 años), Bob (22 años) }
     }
 }

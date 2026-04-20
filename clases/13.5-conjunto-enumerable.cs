@@ -4,7 +4,7 @@
 static class Program {
     public static void Main() {
         var a1 = new Alumno("Ana", 20);
-        var a2 = new Alumno("Anita", 20);
+        var a2 = new Alumno("Ani", 20);
         var b1 = new Alumno("Bob", 22);
 
         var clase = new Conjunto<Alumno>();
@@ -17,7 +17,7 @@ static class Program {
         Console.WriteLine($" Hay {clase.Count} elementos."); // 2
         Console.WriteLine($" - Contiene  Ana?: {clase.Contiene(a2)}");  // True
         Console.WriteLine($" - Contiene  Bob?: {clase.Contiene(b1)}");  // True
-        Console.WriteLine($" - Contiene  Carlos?: {clase.Contiene(new Alumno("Carlos", 25))}");  // False
+        Console.WriteLine($" - Contiene  Car?: {clase.Contiene(new Alumno("Car", 25))}");  // False
         Console.WriteLine($" Conjunto<Alumno>: {clase}"); // { Ana (20 años), Bob (22 años) }
         
         Console.WriteLine("\n== Alumnos (Recorrido con foreach) ==");
@@ -33,7 +33,7 @@ record class Alumno(string Nombre, int Legajo) : IEquatable<Alumno> {
         return this.Legajo == otro.Legajo;
     }
 
-    public override int GetHashCode() =>Legajo.GetHashCode();
+    public override int GetHashCode() =>Legajo.GetHashCode(); // Para que el conjunto funcione correctamente, GetHashCode debe ser consistente con Equals.
     public override string ToString() => $"{Nombre} (Legajo: {Legajo})";
 }
 
@@ -41,7 +41,6 @@ interface IConjunto<T> where T : IEquatable<T>  {
     void Agregar(T valor);
     void Eliminar(T valor);
     bool Contiene(T valor);
-    int Count { get; }
 
     IEnumerable<T> Elementos { get; }
 }
@@ -72,4 +71,3 @@ class Conjunto<T> : IConjunto<T> where T : IEquatable<T> {
 
     public override string ToString() => $"{{{string.Join(", ", elementos)}}}";
 }
-

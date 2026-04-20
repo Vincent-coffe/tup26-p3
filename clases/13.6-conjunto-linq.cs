@@ -9,27 +9,27 @@ static class Program {
     public static void Main() {
 
         var teorica = new Conjunto<Alumno>();
-        teorica.Agregar(new Alumno("Carlos", 25, 8));
-        teorica.Agregar(new Alumno("Anita",  20, 9));
-        teorica.Agregar(new Alumno("Bob",    22, 4));
-        teorica.Agregar(new Alumno("Carlos", 25, 8));
-        teorica.Agregar(new Alumno("Diana",  18, 9));
+        teorica.Agregar(new Alumno("Car", 25, 8));
+        teorica.Agregar(new Alumno("Ana", 20, 9));
+        teorica.Agregar(new Alumno("Bob", 22, 4));
+        teorica.Agregar(new Alumno("Car", 25, 8));
+        teorica.Agregar(new Alumno("Dia", 18, 9));
         
         var practica = new Conjunto<Alumno>();
-        practica.Agregar(new Alumno("Eve",   30, 8));
-        practica.Agregar(new Alumno("Bob",   22, 7));
-        practica.Agregar(new Alumno("Frank", 28, 8));
-        practica.Agregar(new Alumno("Diana", 18, 9));
+        practica.Agregar(new Alumno("Eve", 30, 8));
+        practica.Agregar(new Alumno("Bob", 22, 7));
+        practica.Agregar(new Alumno("Fra", 28, 8));
+        practica.Agregar(new Alumno("Dia", 18, 9));
 
         Console.Clear();
 
-        Console.WriteLine("== Alumnos (Clase Teorica) ==");
+        Console.WriteLine("== Alumnos (Clase Teórica) ==");
         foreach (var alumno in teorica) {
             Console.WriteLine($" - {alumno}");
         }
-        Console.WriteLine($"Nota promedio: {teorica.Average(a => a.Nota),0:F2}");
-        Console.WriteLine($"Nota minima  : {teorica.Min(a => a.Nota),0:F2}");
-        Console.WriteLine($"Nota maxima  : {teorica.Max(a => a.Nota),0:F2}");
+        Console.WriteLine($"Nota promedio : {teorica.Average(a => a.Nota),0:F2}");
+        Console.WriteLine($"Nota mínima   : {teorica.Min(a => a.Nota),0:F2}");
+        Console.WriteLine($"Nota máxima   : {teorica.Max(a => a.Nota),0:F2}");
 
         Console.WriteLine("\n== Alumnos (Filtrados y Ordenados) ==");
         foreach (var alumno in teorica.Where(a => a.Legajo > 20).OrderBy(a => a.Nombre)) {
